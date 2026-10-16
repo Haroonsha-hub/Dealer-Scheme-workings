@@ -163,7 +163,13 @@ tr.click:hover td{background:var(--accent-soft)}
 .panel{background:var(--surface);border:1px solid var(--accent);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
 .panel h3{font-size:20px}
 .panel .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
-.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:18px;text-align:center;background:var(--sunk)}
+.drop{position:relative;display:block;border:1.5px dashed var(--line);border-radius:var(--r);padding:22px 18px;text-align:center;background:var(--sunk);cursor:pointer}
+.drop .pick-btn{display:inline-block;margin-top:10px;background:var(--accent);color:var(--accent-ink);font-weight:700;border-radius:999px;padding:10px 20px;font-size:15px}
+.drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px;z-index:2}
+.alt-pick{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.alt-pick input[type=file]{font-size:14px;max-width:100%}
+.help{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.help b{color:var(--ink)}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .stats div{background:var(--sunk);border-radius:8px;padding:8px 10px}
@@ -195,7 +201,7 @@ ul.plain{margin:0;padding-left:18px}
 .dslabs b{font-family:var(--display);font-size:20px;font-weight:700;line-height:1.1}
 @media (max-width:860px){.promo{grid-template-columns:auto minmax(0,1fr)}.dslabs{grid-column:1/-1}}
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:640px){.pick{grid-template-columns:minmax(0,1fr)}.month{display:none}.brand h1{font-size:16px}}
+@media (max-width:640px){.pick{grid-template-columns:minmax(0,1fr)}.month{display:none}.brand h1{font-size:17px;white-space:normal;line-height:1.15}.top .btn.primary{padding:7px 12px;flex:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* data stamp strip */
@@ -2008,7 +2014,10 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   }
   function viewUpload(){
     var h='<section class="panel" aria-labelledby="upH"><h3 id="upH">Upload scheme working</h3>'+
-      '<label class="drop" id="drop" for="file"><b>Choose Excel file</b><br><span class="muted">or drop it here · .xlsx, .xls, .xlsm</span></label><input id="file" type="file" accept=".xlsx,.xls,.xlsm" hidden>';
+      (inAppBrowser()?'<div class="msg info">You seem to have opened this link inside another app. If the file picker does not open, tap the menu (⋮ or ···) and choose <b>Open in Chrome</b> or <b>Open in browser</b>.</div>':'')+
+      '<div class="drop" id="drop"><b>Tap here to choose the Excel file</b><br><span class="muted">or drop it here · .xlsx, .xls, .xlsm</span><br><span class="pick-btn" aria-hidden="true">Choose file</span><input id="file" class="fileIn" type="file" aria-label="Choose scheme working Excel file"></div>'+
+      '<div class="alt-pick"><label for="file2" class="muted">Picker not opening? Try this button instead:</label><input id="file2" class="fileIn" type="file"></div>'+
+      '<div class="help"><span><b>Excel received on WhatsApp?</b> Open it in WhatsApp and tap Download or Save first. Then look under <b>Downloads</b> or <b>Documents</b> in the file picker.</span><span><b>Nothing happens when you tap?</b> Open this link in Chrome or another full browser, not inside WhatsApp or Instagram.</span></div>';
     if(S.upMsg) h+='<div class="msg '+S.upMsg[0]+'">'+esc(S.upMsg[1])+'</div>';
     h+='<p class="note" style="margin:0">The file is read in this browser only and is not uploaded to any server.</p></section>';
     return h;
@@ -2021,7 +2030,7 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     if(!S.meta) h+= S.tab==="book" ? viewBook() : emptyState()+viewUpload();
     else h+= S.tab==="dealer" ? viewDealer() : S.tab==="push" ? viewPush() : viewBook();
     $("main").innerHTML=h;
-    var f=$("file"); if(f) f.addEventListener("change",function(){ if(f.files[0]) readFile(f.files[0]); });
+    document.querySelectorAll(".fileIn").forEach(function(f){ f.addEventListener("change",function(){ if(f.files&&f.files[0]) readFile(f.files[0]); }); });
     var dz=$("drop");
     if(dz){
       dz.addEventListener("dragover",function(e){ e.preventDefault(); dz.classList.add("over"); });
@@ -2031,23 +2040,10 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   }
 
   /* ---------- upload ---------- */
+  function inAppBrowser(){ var ua=navigator.userAgent||""; return /; wv\)|FBAN|FBAV|Instagram|Line\/|WhatsApp|Snapchat|GSA\//i.test(ua); }
   function readFile(file){
     S.upMsg=null;
-    if(typeof XLSX==="undefined"){ S.upMsg=["err","The Excel reader did not load. Reload the page and try again."]; render(); return; }
-    var fr=new FileReader();
-    fr.onload=function(){
-      try{
-        var wb=XLSX.read(new Uint8Array(fr.result),{type:"array"});
-        var parsed=SchemeParser.parseWorkbook(XLSX,wb);
-        S.up={ parsed:parsed, fileName:file.name, month:(S.config&&S.config.month)||new Date().toLocaleDateString("en-IN",{month:"long",year:"numeric"}) };
-      }catch(e){ S.up=null; S.upMsg=["err","Could not read this file: "+(e.message||e)]; }
-      render();
-    };
-    fr.onerror=function(){ S.upMsg=["err","Could not open the file. Try saving it again from Excel."]; render(); };
-    fr.readAsArrayBuffer(file);
-  }
-  function readFile(file){
-    S.upMsg=null;
+    var nm=file.name||""; if(/\.[a-z0-9]{2,5}$/i.test(nm) && !/\.(xlsx|xlsm|xls|xlsb)$/i.test(nm) && !/sheet|excel/i.test(file.type||"")){ S.upMsg=["err","“"+(file.name||"This file")+"” is not an Excel file. Choose the scheme-working .xlsx file."]; render(); return; }
     if(typeof XLSX==="undefined"){ S.upMsg=["err","The Excel reader did not load. Check your internet connection and reload the page."]; render(); return; }
     var fr=new FileReader();
     fr.onload=function(){
