@@ -1,5 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Dealer Scheme Portal</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -193,8 +197,18 @@ ul.plain{margin:0;padding-left:18px}
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.pick{grid-template-columns:minmax(0,1fr)}.month{display:none}.brand h1{font-size:16px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
 
+/* data stamp strip */
+.stampbar{background:var(--surface);border-bottom:1px solid var(--line)}
+.stamp{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding-block:8px;font-size:13px}
+.stamp .dot{width:8px;height:8px;border-radius:50%;background:var(--leaf);flex:none}
+.stamp .dot.stale{background:var(--berry)}
+.stamp b{font-weight:700}
+.stamp .grow{flex:1}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:700;cursor:pointer;padding:2px 4px;font-size:13px}
+</style>
+</head>
+<body>
 <header class="top">
   <div class="wrap">
     <div class="brand"><h1>Birla Opus Dealer Scheme Dashboard</h1></div>
@@ -202,6 +216,8 @@ ul.plain{margin:0;padding-left:18px}
     <button class="btn primary" id="uploadBtn" hidden>Upload working</button>
   </div>
 </header>
+
+<div class="stampbar"><div class="wrap stamp" id="stamp" aria-live="polite"><span class="dot"></span><span>Loading data…</span></div></div>
 
 <div class="wrap">
   <div class="pick">
@@ -221,6 +237,1185 @@ ul.plain{margin:0;padding-left:18px}
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* Slab rules for the month (from the scheme letter). Update this block when the letter changes. */
+window.SLABS = {
+ "month": "October 2026",
+ "letter": "IN2-021026-V11-002 · Kerala",
+ "schemes": [
+  {
+   "group": "OTC · Kerala (1st - 27th)",
+   "name": "OTC Diary scheme",
+   "period": "1–27 Oct",
+   "ends": "2026-10-27",
+   "highlight": true,
+   "parts": [
+    {
+     "label": "Diaries on GSR",
+     "unit": "₹",
+     "basis": "GSR Value",
+     "giftCol": "Gifts",
+     "giftUnit": "diaries",
+     "note": "Diaries by GSR value billed 1–27 Oct.",
+     "slabs": [
+      {
+       "min": 100000,
+       "gift": "5 diaries"
+      },
+      {
+       "min": 200000,
+       "gift": "10 diaries"
+      },
+      {
+       "min": 400000,
+       "gift": "18 diaries"
+      },
+      {
+       "min": 600000,
+       "gift": "26 diaries"
+      },
+      {
+       "min": 900000,
+       "gift": "36 diaries"
+      },
+      {
+       "min": 1200000,
+       "gift": "50 diaries"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "group": "Early Bird",
+   "name": "Early Bird",
+   "parts": [
+    {
+     "label": "EB1",
+     "period": "1–9 Oct",
+     "unit": "₹",
+     "basis": "EB1 GSR(Q)",
+     "pctCol": "EB1 CN%",
+     "cnCol": "EB 1 CN",
+     "slabs": [
+      {
+       "min": 50000,
+       "pct": 0.01
+      },
+      {
+       "min": 100000,
+       "pct": 0.015
+      },
+      {
+       "min": 200000,
+       "pct": 0.02
+      }
+     ],
+     "ends": "2026-10-09"
+    },
+    {
+     "label": "EB2",
+     "period": "10–16 Oct",
+     "unit": "₹",
+     "basis": "EB2 GSR(Q)",
+     "pctCol": "EB2 CN%",
+     "cnCol": "EB2 CN",
+     "slabs": [
+      {
+       "min": 50000,
+       "pct": 0.007
+      },
+      {
+       "min": 100000,
+       "pct": 0.01
+      },
+      {
+       "min": 200000,
+       "pct": 0.013
+      }
+     ],
+     "ends": "2026-10-16"
+    },
+    {
+     "label": "EB3",
+     "period": "17–23 Oct",
+     "unit": "₹",
+     "basis": "EB3 GSR(Q)",
+     "pctCol": "EB3 CN%",
+     "cnCol": "EB3 CN",
+     "slabs": [
+      {
+       "min": 50000,
+       "pct": 0.003
+      },
+      {
+       "min": 100000,
+       "pct": 0.005
+      },
+      {
+       "min": 200000,
+       "pct": 0.007
+      }
+     ],
+     "ends": "2026-10-23"
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Rise to Shine",
+   "name": "Rise to Shine",
+   "period": "1–5 Oct",
+   "parts": [
+    {
+     "label": "GSR gift",
+     "unit": "₹",
+     "basis": "GSR",
+     "giftCol": "Gift",
+     "note": "Gifts as per the Kerala working sheet. Letter lists ₹400 CN at ₹20,000 and ₹600 CN at ₹30,000. No multiples.",
+     "slabs": [
+      {
+       "min": 20000,
+       "gift": "1 Water Camper"
+      },
+      {
+       "min": 30000,
+       "gift": "1 Iron Box"
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-05"
+  },
+  {
+   "group": "Luxury",
+   "name": "Luxury emulsions",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 40,
+       "pct": 0.035
+      },
+      {
+       "min": 50,
+       "pct": 0.04
+      },
+      {
+       "min": 100,
+       "pct": 0.0425
+      },
+      {
+       "min": 250,
+       "pct": 0.045
+      },
+      {
+       "min": 400,
+       "pct": 0.05
+      },
+      {
+       "min": 700,
+       "pct": 0.0525
+      },
+      {
+       "min": 1000,
+       "pct": 0.055
+      },
+      {
+       "min": 1200,
+       "pct": 0.0575
+      }
+     ]
+    },
+    {
+     "label": "Interior topcoats fixed CN",
+     "period": "till 28 Oct",
+     "basis": "Lux Int",
+     "every": {
+      "size": 50,
+      "amt": 300
+     },
+     "ends": "2026-10-28"
+    },
+    {
+     "label": "Exterior topcoats fixed CN",
+     "period": "till 28 Oct",
+     "basis": "Lux Ext",
+     "every": {
+      "size": 50,
+      "amt": 250
+     },
+     "ends": "2026-10-28"
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Premium",
+   "name": "Premium emulsions",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 40,
+       "pct": 0.045
+      },
+      {
+       "min": 125,
+       "pct": 0.055
+      },
+      {
+       "min": 300,
+       "pct": 0.06
+      },
+      {
+       "min": 700,
+       "pct": 0.0625
+      },
+      {
+       "min": 1000,
+       "pct": 0.065
+      },
+      {
+       "min": 1500,
+       "pct": 0.0675
+      },
+      {
+       "min": 2000,
+       "pct": 0.07
+      },
+      {
+       "min": 3000,
+       "pct": 0.075
+      },
+      {
+       "min": 4000,
+       "pct": 0.08
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Floor Shade & Tile Shade",
+   "name": "Neo Floor & Tile Shade",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "note": "Also: duffle bag (₹1,200) on 20 L Neo Floor Shade or 60 L Neo Tile Shade.",
+     "slabs": [
+      {
+       "min": 8,
+       "pct": 0.03
+      },
+      {
+       "min": 20,
+       "pct": 0.04
+      },
+      {
+       "min": 50,
+       "pct": 0.045
+      },
+      {
+       "min": 100,
+       "pct": 0.05
+      },
+      {
+       "min": 200,
+       "pct": 0.055
+      },
+      {
+       "min": 300,
+       "pct": 0.065
+      },
+      {
+       "min": 400,
+       "pct": 0.07
+      },
+      {
+       "min": 500,
+       "pct": 0.08
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Economy Emulsions",
+   "name": "Economy & sub-economy emulsions",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Economy (Color Smart + Power Bright)",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 80,
+       "pct": 0.0275
+      },
+      {
+       "min": 200,
+       "pct": 0.03
+      },
+      {
+       "min": 350,
+       "pct": 0.035
+      },
+      {
+       "min": 600,
+       "pct": 0.04
+      },
+      {
+       "min": 1000,
+       "pct": 0.045
+      },
+      {
+       "min": 1500,
+       "pct": 0.05
+      },
+      {
+       "min": 2000,
+       "pct": 0.0525
+      },
+      {
+       "min": 3500,
+       "pct": 0.0575
+      }
+     ]
+    },
+    {
+     "label": "Sub-economy (Color Fresh + Power Fit)",
+     "basis": [
+      "Colour Fresh Vol",
+      "Power Fit Vol"
+     ],
+     "pctCol": "CN%#2",
+     "valueCol": "Sub Eco Val",
+     "slabs": [
+      {
+       "min": 100,
+       "pct": 0.0175
+      },
+      {
+       "min": 200,
+       "pct": 0.02
+      },
+      {
+       "min": 500,
+       "pct": 0.025
+      },
+      {
+       "min": 1000,
+       "pct": 0.0325
+      },
+      {
+       "min": 2000,
+       "pct": 0.0375
+      },
+      {
+       "min": 3000,
+       "pct": 0.0425
+      }
+     ]
+    },
+    {
+     "label": "Power Bright extra CN",
+     "period": "till 28 Oct",
+     "basis": "Power Bright Vol",
+     "every": {
+      "size": 100,
+      "amt": 600
+     },
+     "ends": "2026-10-28"
+    },
+    {
+     "label": "Power Fit extra CN",
+     "period": "till 28 Oct",
+     "basis": "Power Fit Vol",
+     "every": {
+      "size": 100,
+      "amt": 200
+     },
+     "ends": "2026-10-28"
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Alldry_COMPONENT 1",
+   "name": "Alldry waterproofing",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 100,
+       "pct": 0.03
+      },
+      {
+       "min": 200,
+       "pct": 0.035
+      },
+      {
+       "min": 350,
+       "pct": 0.04
+      },
+      {
+       "min": 500,
+       "pct": 0.045
+      },
+      {
+       "min": 800,
+       "pct": 0.05
+      },
+      {
+       "min": 1500,
+       "pct": 0.055
+      },
+      {
+       "min": 2500,
+       "pct": 0.0575
+      },
+      {
+       "min": 5000,
+       "pct": 0.06
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Alldry_COMPONENT 2",
+   "name": "Alldry waterproofing · component 2",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 100,
+       "pct": 0.03
+      },
+      {
+       "min": 200,
+       "pct": 0.035
+      },
+      {
+       "min": 350,
+       "pct": 0.04
+      },
+      {
+       "min": 500,
+       "pct": 0.045
+      },
+      {
+       "min": 800,
+       "pct": 0.05
+      },
+      {
+       "min": 1500,
+       "pct": 0.055
+      },
+      {
+       "min": 2500,
+       "pct": 0.0575
+      },
+      {
+       "min": 5000,
+       "pct": 0.06
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Additional Schem Alldry RM & CM",
+   "name": "Repair Master & Crack Master",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 40,
+       "pct": 0.025
+      },
+      {
+       "min": 100,
+       "pct": 0.035
+      },
+      {
+       "min": 200,
+       "pct": 0.045
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Additional Offer Alldry",
+   "name": "Alldry extra fixed CN",
+   "period": "till 28 Oct",
+   "parts": [
+    {
+     "label": "Alldry range",
+     "basis": "Alldry",
+     "every": {
+      "size": 100,
+      "amt": 1500
+     }
+    },
+    {
+     "label": "Wallfix 4",
+     "basis": "Wallfix 4",
+     "every": {
+      "size": 50,
+      "amt": 125
+     }
+    }
+   ],
+   "ends": "2026-10-28"
+  },
+  {
+   "group": "Comp PHP, PFP & PSP",
+   "name": "Primers",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Perfect Start (PSP)",
+     "basis": "PSP Act",
+     "slabs": [
+      {
+       "min": 50,
+       "pct": 0.055
+      },
+      {
+       "min": 100,
+       "pct": 0.06
+      },
+      {
+       "min": 200,
+       "pct": 0.065
+      },
+      {
+       "min": 325,
+       "pct": 0.075
+      },
+      {
+       "min": 500,
+       "pct": 0.085
+      }
+     ],
+     "extra": {
+      "size": 50,
+      "amt": 100,
+      "label": "Fixed CN every 50 L"
+     }
+    },
+    {
+     "label": "Pro Hide (PHP)",
+     "basis": "PHP Act",
+     "slabs": [
+      {
+       "min": 325,
+       "pct": 0.01
+      },
+      {
+       "min": 500,
+       "pct": 0.02
+      }
+     ],
+     "extra": {
+      "size": 50,
+      "amt": 100,
+      "label": "Fixed CN every 50 L"
+     }
+    },
+    {
+     "label": "Perfect Choice (PCP)",
+     "basis": "PCP Act",
+     "slabs": [
+      {
+       "min": 200,
+       "pct": 0.005
+      },
+      {
+       "min": 325,
+       "pct": 0.015
+      },
+      {
+       "min": 500,
+       "pct": 0.02
+      },
+      {
+       "min": 1000,
+       "pct": 0.025
+      }
+     ],
+     "extra": {
+      "size": 50,
+      "amt": 100,
+      "label": "Fixed CN every 50 L"
+     }
+    },
+    {
+     "label": "Pro Fresh (PFP)",
+     "basis": "PFP Act",
+     "slabs": [
+      {
+       "min": 1000,
+       "pct": 0.005
+      }
+     ],
+     "extra": {
+      "size": 50,
+      "amt": 475,
+      "label": "Fixed CN every 50 L"
+     }
+    },
+    {
+     "label": "Pro White (PWP)",
+     "basis": "PWP Act",
+     "every": {
+      "size": 50,
+      "amt": 225
+     }
+    },
+    {
+     "label": "Pro Smooth",
+     "basis": "Pro Smooth Primer",
+     "every": {
+      "size": 50,
+      "amt": 100
+     }
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Comp Style Super Bright & Smooth",
+   "name": "Super Bright & Super Smooth",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "unit": "kg",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 400,
+       "pct": 0.005
+      },
+      {
+       "min": 1000,
+       "pct": 0.0075
+      },
+      {
+       "min": 2500,
+       "pct": 0.01
+      },
+      {
+       "min": 5000,
+       "pct": 0.015
+      },
+      {
+       "min": 10000,
+       "pct": 0.02
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Salt Seal",
+   "name": "Salt Seal",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Fixed CN",
+     "basis": "Act",
+     "slabs": [
+      {
+       "min": 40,
+       "amt": 500
+      },
+      {
+       "min": 80,
+       "amt": 1200
+      }
+     ],
+     "beyond": {
+      "after": 80,
+      "size": 40,
+      "amt": 600
+     }
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Stainers",
+   "name": "Universal Stainers",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Fixed CN",
+     "basis": "Act",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 5,
+       "amt": 250
+      },
+      {
+       "min": 10,
+       "amt": 550
+      },
+      {
+       "min": 20,
+       "amt": 1350
+      },
+      {
+       "min": 40,
+       "amt": 3000
+      },
+      {
+       "min": 80,
+       "amt": 7200
+      },
+      {
+       "min": 150,
+       "perUnit": 100
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Calista_Sparkle Glass Enamel",
+   "name": "Sparkle Gloss Enamel",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "shadesCol": "No Shades Billed",
+     "pctCol": "Final CN %",
+     "cnCol": "CN",
+     "note": "₹200 from 20 L is as per the working sheet. Higher slabs need a minimum number of shades.",
+     "slabs": [
+      {
+       "min": 20,
+       "amt": 200
+      },
+      {
+       "min": 40,
+       "pct": 0.065
+      },
+      {
+       "min": 125,
+       "pct": 0.07,
+       "shades": 4
+      },
+      {
+       "min": 250,
+       "pct": 0.08,
+       "shades": 6
+      },
+      {
+       "min": 400,
+       "pct": 0.1,
+       "shades": 8
+      },
+      {
+       "min": 750,
+       "pct": 0.105,
+       "shades": 8
+      },
+      {
+       "min": 1500,
+       "pct": 0.11,
+       "shades": 8
+      },
+      {
+       "min": 2500,
+       "pct": 0.12,
+       "shades": 8
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Sparkle Satin & PU",
+   "name": "Sparkle Satin & PU",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Tea set",
+     "basis": "Vol",
+     "every": {
+      "size": 30,
+      "gift": "Tea & cookie set (₹1,899)"
+     },
+     "note": "Or the Enamel Thailand trip option."
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Cover Max Glass Enamel",
+   "name": "Cover Max Gloss Enamel",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Volume CN",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 50,
+       "pct": 0.02
+      },
+      {
+       "min": 100,
+       "pct": 0.0225
+      },
+      {
+       "min": 200,
+       "pct": 0.025
+      },
+      {
+       "min": 300,
+       "pct": 0.03
+      }
+     ],
+     "extra": {
+      "size": 50,
+      "amt": 350,
+      "label": "Fixed CN every 50 L"
+     }
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "RO & Wood Primer",
+   "name": "Cover Max RO / Sparkle RO / Wood primers",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Fixed CN",
+     "basis": "Act",
+     "cnCol": "CN",
+     "every": {
+      "size": 50,
+      "amt": 350
+     }
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Sparkle RO & YO",
+   "name": "Sparkle RO, YO & designer finish",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Sparkle RO / YO / Epoxy / Wood",
+     "basis": "Act",
+     "pctCol": "CN%",
+     "cnCol": "CN",
+     "slabs": [
+      {
+       "min": 50,
+       "pct": 0.01
+      },
+      {
+       "min": 150,
+       "pct": 0.02
+      }
+     ]
+    },
+    {
+     "label": "Cover Max RO primer",
+     "basis": "Cover Max RO Primer Vol",
+     "slabs": [
+      {
+       "min": 100,
+       "pct": 0.01
+      },
+      {
+       "min": 300,
+       "pct": 0.02
+      }
+     ]
+    },
+    {
+     "label": "Interior Designer Finish",
+     "basis": "Inter Design",
+     "slabs": [
+      {
+       "min": 6,
+       "pct": 0.07
+      },
+      {
+       "min": 20,
+       "pct": 0.08
+      },
+      {
+       "min": 51,
+       "pct": 0.09
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Rollers",
+   "name": "Artist rollers",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "GSR CN",
+     "unit": "₹",
+     "basis": "GSR",
+     "note": "One-time ₹500 CN for first-time tools billing of ₹5,000+.",
+     "slabs": [
+      {
+       "min": 5000,
+       "pct": 0.22
+      },
+      {
+       "min": 10001,
+       "pct": 0.26
+      },
+      {
+       "min": 15001,
+       "pct": 0.31
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "MT",
+   "name": "Artist masking tape",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "GSR CN",
+     "unit": "₹",
+     "basis": "GSR",
+     "slabs": [
+      {
+       "min": 5000,
+       "pct": 0.25
+      },
+      {
+       "min": 10001,
+       "pct": 0.27
+      },
+      {
+       "min": 15001,
+       "pct": 0.31
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "SP",
+   "name": "Artist sandpapers",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "GSR CN",
+     "unit": "₹",
+     "basis": "GSR",
+     "slabs": [
+      {
+       "min": 5000,
+       "pct": 0.22
+      },
+      {
+       "min": 10001,
+       "pct": 0.28
+      },
+      {
+       "min": 15001,
+       "pct": 0.33
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Ancillary",
+   "name": "Ancillary reward",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Sling bag (Aluminium, KPF, Clear Varnish)",
+     "basis": [
+      "Aluminium",
+      "KPF",
+      "Clear Syn Varnish"
+     ],
+     "every": {
+      "size": 15,
+      "gift": "Sling bag"
+     }
+    },
+    {
+     "label": "Style Aluminium Paint CN",
+     "basis": "Aluminium",
+     "slabs": [
+      {
+       "min": 100,
+       "pct": 0.03
+      },
+      {
+       "min": 200,
+       "pct": 0.05
+      },
+      {
+       "min": 300,
+       "pct": 0.07
+      },
+      {
+       "min": 950,
+       "pct": 0.1
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "True Look Shine",
+   "name": "True Look Shine launch",
+   "period": "1–31 Oct",
+   "parts": [
+    {
+     "label": "Grooming kit",
+     "basis": "Vol",
+     "every": {
+      "size": 25,
+      "gift": "Grooming kit (₹1,237)"
+     }
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Eco Thailand",
+   "name": "Style Getaway · Thailand",
+   "period": "1 Sep – 31 Oct",
+   "parts": [
+    {
+     "label": "Economy + sub-economy, Sep + Oct",
+     "basis": [
+      "Sep Total Eco Vol",
+      "Total Economy"
+     ],
+     "giftCol": "Thailand Ticket",
+     "note": "Dealer gets the trip or the volume CN, at the highest slab level.",
+     "gates": [
+      {
+       "label": "Sep billing ≥ 2,400 L",
+       "col": "Sep Total Eco Vol",
+       "min": 2400
+      },
+      {
+       "label": "Oct billing ≥ 3,200 L",
+       "col": "Total Economy",
+       "min": 3200
+      }
+     ],
+     "slabs": [
+      {
+       "min": 8000,
+       "gift": "1 Thailand ticket (3N/4D)"
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  },
+  {
+   "group": "Enamel Thailan Dhamaka",
+   "name": "Enamel Thailand Dhamaka",
+   "period": "1 Sep – 31 Oct",
+   "parts": [
+    {
+     "label": "Sparkle Gloss + Satin + PU, Sep + Oct",
+     "basis": [
+      "Sep Vol",
+      "Oct Vol"
+     ],
+     "giftCol": "Thailand",
+     "gates": [
+      {
+       "label": "Sep billing ≥ 1,200 L",
+       "col": "Sep Vol",
+       "min": 1200
+      }
+     ],
+     "slabs": [
+      {
+       "min": 4000,
+       "gift": "Thailand trip (2N/3D)"
+      }
+     ]
+    }
+   ],
+   "ends": "2026-10-31"
+  }
+ ]
+};
+</script>
 <script>
 /* Scheme-working workbook parser. Pure: takes the SheetJS global and a workbook. */
 var SchemeParser = (function () {
@@ -333,7 +1528,6 @@ var SchemeParser = (function () {
   return { parseWorkbook: parseWorkbook, norm: norm };
 })();
 if (typeof module !== "undefined") module.exports = SchemeParser;
-
 </script>
 <script>
 /* Slab engine: works out qualified benefit and next slab per scheme part. Pure. */
@@ -543,12 +1737,14 @@ var SlabEngine = (function () {
   return { analyzeDealer: analyzeDealer, analyzePart: analyzePart, norm: norm };
 })();
 if (typeof module !== "undefined") module.exports = SlabEngine;
-
 </script>
 <script>
 (function(){
   "use strict";
-  var S = { meta:null, config:null, loaded:{data:false,cfg:false}, canEdit:false, db:null,
+  var CFG = window.PORTAL_CONFIG || {};
+  var API = "local";
+  var STORE_KEY = "sp.working.v1";
+  var S = { meta:null, config:null, loaded:{data:false,cfg:false}, canEdit:true, loadError:null, checkedAt:null, stamp:null,
             tsm:"", dealer:"", tab:"dealer", push:"25", showUpload:false, up:null, upMsg:null, cfgMsg:null, editCfg:false };
   var $ = function(id){ return document.getElementById(id); };
   var today = (function(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); })();
@@ -560,6 +1756,17 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   function pct(v){ return (Math.round(v*10000)/100).toString()+"%"; }
   function rateText(r,u){ if(!r) return "—"; if(r.kind==="pct") return pct(r.v); if(r.kind==="amt") return inr(r.v); if(r.kind==="perUnit") return inr(r.v)+"/"+(u==="₹"?"unit":u); return r.v; }
   function minText(m,u){ return u==="₹" ? (m>=100000? "₹"+(m/100000).toLocaleString("en-IN",{maximumFractionDigits:2})+"L" : m>=1000? "₹"+(m/1000).toLocaleString("en-IN",{maximumFractionDigits:1})+"K" : "₹"+m) : nfmt(m)+" "+u; }
+  function fmtFull(iso){ try{ return new Date(iso).toLocaleString("en-IN",{weekday:"short",day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"}); }catch(e){ return iso; } }
+  function ago(iso){ var m=Math.round((Date.now()-new Date(iso).getTime())/60000); if(isNaN(m)) return ""; if(m<1) return "just now"; if(m<60) return m+" min ago"; var h=Math.round(m/60); if(h<24) return h+" hr ago"; var d=Math.round(h/24); return d+" day"+(d>1?"s":"")+" ago"; }
+  function renderStamp(){
+    var el=$("stamp"); if(!el) return;
+    if(!S.meta){ el.innerHTML='<span class="dot stale"></span><span>No working file loaded on this device yet.</span><span class="grow"></span><button class="linkbtn" data-act="openup">Upload working</button>'; return; }
+    var m=S.meta;
+    el.innerHTML='<span class="dot"></span><span>Data as of <b>'+esc(fmtFull(m.fileModified||m.uploadedAt))+'</b> <span class="muted">(file saved '+esc(ago(m.fileModified||m.uploadedAt))+')</span></span>'+
+      '<span class="muted mono">'+esc(m.fileName||"")+'</span>'+
+      '<span class="muted">Uploaded here '+esc(fmtFull(m.uploadedAt))+'</span><span class="grow"></span>'+
+      '<button class="linkbtn" data-act="openup">Upload new file</button><button class="linkbtn" data-act="forget">Clear</button>';
+  }
   function fmtDate(iso){ try{ return new Date(iso).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); }catch(e){ return iso; } }
   function endText(e){ if(!e) return ""; var d=new Date(e+"T00:00:00"); return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"}); }
 
@@ -572,7 +1779,8 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   /* ---------- header & selectors ---------- */
   function renderTop(){
     var mi=$("monthInfo");
-    if(S.meta){ mi.innerHTML="<b>"+esc(S.meta.month||"Scheme working")+"</b><span>Updated "+esc(fmtDate(S.meta.uploadedAt))+"</span>"; }
+    renderStamp();
+    if(S.meta){ mi.innerHTML="<b>"+esc(S.meta.month||"Scheme working")+"</b><span>Data as of "+esc(fmtDate(S.meta.fileModified||S.meta.uploadedAt))+"</span>"; }
     else if(S.loaded.data){ mi.innerHTML="<b>No working yet</b><span>Waiting for the first upload</span>"; }
     $("uploadBtn").hidden = !S.canEdit;
     $("uploadBtn").textContent = S.showUpload ? "Close upload" : "Upload working";
@@ -710,8 +1918,7 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   /* ---------- views ---------- */
   function emptyState(){
     if(!S.loaded.data) return '<div class="empty"><h3>Loading scheme working…</h3><p>Dealer dashboards appear here once the latest file loads.</p></div>';
-    if(!S.db) return '<div class="empty"><h3>Sign in to see scheme figures</h3><p>This portal reads the shared scheme working, which needs a signed-in Claude account with access to this page.</p></div>';
-    return '<div class="empty"><h3>No scheme working uploaded yet</h3><p>'+(S.canEdit? 'Use <b>Upload working</b> at the top to load this month’s Excel. TSMs will see dealer dashboards as soon as it is published.' : 'Your ASM has not uploaded this month’s working yet. Check back after the next update.')+'</p></div>';
+    return '<div class="empty"><h3>Upload this month’s scheme working</h3><p>Choose the scheme-working Excel from your phone or computer. It is read in your browser and not sent anywhere, and it is remembered on this device until you upload a newer one or clear it.</p></div>';
   }
   function viewDealer(){
     var d=findDealer(S.dealer);
@@ -790,13 +1997,8 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   }
   function viewBook(){
     var c=S.config;
-    var h='<div class="sec-h"><h3>Slab book'+(c&&c.month?" · "+esc(c.month):"")+'</h3>'+(S.canEdit?'<button class="btn" data-act="editcfg">'+(S.editCfg?"Close editor":"Edit slab rules")+'</button>':'')+'</div>';
-    if(c&&c.letter) h+='<p class="muted" style="margin:0">Scheme letter '+esc(c.letter)+'. These slabs drive the “Next” lines on every dealer dashboard.</p>';
-    if(S.canEdit && S.editCfg){
-      h+='<div class="panel"><h3>Slab rules</h3><p class="muted" style="margin:0">Each entry matches a scheme heading in row 1 of the working sheet (<span class="mono">group</span>) and points to its column headings. Edit numbers, then save. Changes apply to every dealer at once.</p>'+
-        '<textarea id="cfgText" spellcheck="false">'+esc(JSON.stringify(c||{month:"",schemes:[]},null,1))+'</textarea>'+
-        '<div class="row"><button class="btn primary" data-act="savecfg">Save slab rules</button></div>'+(S.cfgMsg?'<div class="msg '+S.cfgMsg[0]+'">'+esc(S.cfgMsg[1])+'</div>':'')+'</div>';
-    }
+    var h='<div class="sec-h"><h3>Slab book'+(c&&c.month?" · "+esc(c.month):"")+'</h3>'+'</div>';
+    if(c&&c.letter) h+='<p class="muted" style="margin:0">Scheme letter '+esc(c.letter)+'. These slabs drive the “Next” lines on every dealer dashboard. Slabs are set for the month in this page.</p>';
     if(!c||!c.schemes||!c.schemes.length) return h+'<div class="empty"><p>No slab rules saved yet. Dealer dashboards still show working-sheet figures; next-slab lines appear once rules are added.</p></div>';
     h+='<div class="book">'+c.schemes.map(function(s){
       return '<article class="card"><header><div><h4>'+esc(s.name||s.group)+'</h4><div class="p">'+esc(s.period||"")+(s.ends?" · ends "+esc(endText(s.ends)):"")+'</div></div></header>'+
@@ -806,31 +2008,17 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   }
   function viewUpload(){
     var h='<section class="panel" aria-labelledby="upH"><h3 id="upH">Upload scheme working</h3>'+
-      '<p class="muted" style="margin:0">Choose the monthly scheme-working Excel. The portal reads every sheet with a <b>Parent</b> and <b>Parent Name</b> header row (Scheme Working and OTC Working), with scheme names in the row above. Publishing replaces the current figures for all TSMs.</p>'+
       '<label class="drop" id="drop" for="file"><b>Choose Excel file</b><br><span class="muted">or drop it here · .xlsx, .xls, .xlsm</span></label><input id="file" type="file" accept=".xlsx,.xls,.xlsm" hidden>';
-    var u=S.up;
-    if(u&&u.parsed){
-      var p=u.parsed, cfg=S.config||{schemes:[]};
-      var keys=p.groups.filter(function(g){return !g.empty;}).map(function(g){return SlabEngine.norm(g.key);});
-      var matched=cfg.schemes.filter(function(s){ return p.groups.some(function(g){ return SlabEngine.norm(g.key)===SlabEngine.norm(s.group); }); });
-      var noRules=p.groups.filter(function(g){ return !g.empty && g.title!=="Overall" && !cfg.schemes.some(function(s){ return SlabEngine.norm(s.group)===SlabEngine.norm(g.key); }); });
-      var noBlock=cfg.schemes.filter(function(s){ return matched.indexOf(s)<0; });
-      h+='<div class="stats"><div><b class="num">'+p.dealers.length+'</b>dealers</div><div><b class="num">'+Object.keys(p.tsms).length+'</b>TSMs</div><div><b class="num">'+keys.length+'</b>scheme blocks with data</div><div><b class="num">'+matched.length+'</b>matched to slab rules</div></div>';
-      h+='<div class="note">File: <span class="mono">'+esc(u.fileName)+'</span> · TSMs: '+esc(Object.keys(p.tsms).map(function(t){return t+" ("+p.tsms[t]+")";}).join(", "))+'</div>';
-      if(noRules.length) h+='<div class="msg info">No slab rules for: '+esc(noRules.map(function(g){return g.key;}).join(", "))+'. These show as working-sheet figures only.</div>';
-      if(noBlock.length) h+='<div class="msg info">Slab rules with no matching block in this file: '+esc(noBlock.map(function(s){return s.group;}).join(", "))+'. If a heading was renamed, update it in the slab book.</div>';
-      p.warnings.forEach(function(w){ h+='<div class="msg info">'+esc(w)+'</div>'; });
-      h+='<div class="row"><div class="field" style="flex:1;min-width:200px"><label for="monthLabel">Month label</label><input id="monthLabel" value="'+esc(u.month)+'"></div><button class="btn primary" data-act="publish"'+(u.busy?" disabled":"")+'>'+(u.busy?"Publishing…":"Publish to TSMs")+'</button><button class="btn" data-act="cancelup">Discard</button></div>';
-    }
     if(S.upMsg) h+='<div class="msg '+S.upMsg[0]+'">'+esc(S.upMsg[1])+'</div>';
-    h+='<p class="note" style="margin:0">Only people with Editor access to this page can upload or change slab rules. Share the page with TSMs as Viewers.</p></section>';
+    h+='<p class="note" style="margin:0">The file is read in this browser only and is not uploaded to any server.</p></section>';
     return h;
   }
   function render(){
     renderTop();
     var h="";
-    if(S.canEdit && S.showUpload) h+=viewUpload();
-    if(!S.meta) h+= S.tab==="book" ? viewBook() : emptyState();
+    if(S.flash) h+='<div class="msg '+S.flash[0]+'">'+esc(S.flash[1])+'</div>';
+    if(S.showUpload && S.meta) h+=viewUpload();
+    if(!S.meta) h+= S.tab==="book" ? viewBook() : emptyState()+viewUpload();
     else h+= S.tab==="dealer" ? viewDealer() : S.tab==="push" ? viewPush() : viewBook();
     $("main").innerHTML=h;
     var f=$("file"); if(f) f.addEventListener("change",function(){ if(f.files[0]) readFile(f.files[0]); });
@@ -858,31 +2046,33 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     fr.onerror=function(){ S.upMsg=["err","Could not open the file. Try saving it again from Excel."]; render(); };
     fr.readAsArrayBuffer(file);
   }
-  async function publish(){
-    var u=S.up; if(!u||!S.db) return;
-    var label=($("monthLabel")||{}).value||u.month;
-    u.busy=true; render();
-    var me=null; try{ var us=await claude.use("user"); me=us?await us.id():null; }catch(e){}
-    var doc={ month:label, fileName:u.fileName, uploadedAt:new Date().toISOString(), uploadedBy:me,
-      groups:u.parsed.groups, cols:u.parsed.cols, dealers:u.parsed.dealers };
-    try{
-      await S.db.doc("portal/current").set(doc);
-      S.up=null; S.upMsg=["ok","Published "+label+" for "+doc.dealers.length+" dealers. TSMs see the new figures now."];
-    }catch(e){
-      u.busy=false;
-      S.upMsg=["err", e&&e.code==="invalid_argument" ? "Upload refused. Only people with Editor access can publish, and the file must be under 256 KB once read." : "Publish failed ("+(e&&e.code||"error")+"). Try again in a moment."];
-    }
-    render();
+  function readFile(file){
+    S.upMsg=null;
+    if(typeof XLSX==="undefined"){ S.upMsg=["err","The Excel reader did not load. Check your internet connection and reload the page."]; render(); return; }
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var wb=XLSX.read(new Uint8Array(fr.result),{type:"array"});
+        var parsed=SchemeParser.parseWorkbook(XLSX,wb);
+        S.meta={ month:(S.config&&S.config.month)||"", fileName:file.name,
+          fileModified: file.lastModified ? new Date(file.lastModified).toISOString() : null,
+          uploadedAt:new Date().toISOString(), groups:parsed.groups, cols:parsed.cols, dealers:parsed.dealers };
+        if(S.tsm && !S.meta.dealers.some(function(d){ return d.t===S.tsm; })) S.tsm="";
+        if(S.dealer && !findDealer(S.dealer)) S.dealer="";
+        var saved=true; try{ localStorage.setItem(STORE_KEY, JSON.stringify(S.meta)); }catch(e){ saved=false; }
+        S.showUpload=false; S.upMsg=null;
+        S.flash=["ok","Loaded "+file.name+": "+parsed.dealers.length+" dealers, "+Object.keys(parsed.tsms).length+" TSMs."+(saved?"":" This browser could not remember it, so upload it again next time.")+(parsed.warnings.length?" "+parsed.warnings.join(" "):"")];
+      }catch(e){ S.upMsg=["err","Could not read this file: "+(e.message||e)]; }
+      render();
+    };
+    fr.onerror=function(){ S.upMsg=["err","Could not open the file. Try saving it again from Excel."]; render(); };
+    fr.readAsArrayBuffer(file);
   }
-  async function saveCfg(){
-    var t=$("cfgText"); if(!t||!S.db) return;
-    var c;
-    try{ c=JSON.parse(t.value); }catch(e){ S.cfgMsg=["err","The rules are not valid JSON: "+e.message]; render(); return; }
-    if(!c||!Array.isArray(c.schemes)||c.schemes.some(function(s){ return !s.group||!Array.isArray(s.parts); })){ S.cfgMsg=["err","Each scheme needs a \"group\" heading and a \"parts\" list."]; render(); return; }
-    try{ await S.db.doc("portal/slabs").set({config:c, updatedAt:new Date().toISOString()}); S.cfgMsg=["ok","Slab rules saved."]; }
-    catch(e){ S.cfgMsg=["err","Save refused ("+(e&&e.code||"error")+"). Only editors can change slab rules."]; }
-    render();
+  function restore(){
+    try{ var t=localStorage.getItem(STORE_KEY); if(t){ var m=JSON.parse(t); if(m && Array.isArray(m.dealers)) S.meta=m; } }catch(e){}
+    S.loaded.data=true;
   }
+  function loadSlabs(){ S.config = window.SLABS || null; S.loaded.cfg=true; }
 
   /* ---------- search ---------- */
   var hits=[], hi=-1;
@@ -913,40 +2103,24 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   $("results").addEventListener("mousedown",function(e){ var b=e.target.closest("[data-hit]"); if(b){ e.preventDefault(); openDealer(b.dataset.hit); } });
   $("q").addEventListener("blur",function(){ setTimeout(function(){ $("results").hidden=true; },150); });
   document.querySelector(".tabs").addEventListener("click",function(e){ var b=e.target.closest("[data-tab]"); if(b){ S.tab=b.dataset.tab; render(); } });
-  $("uploadBtn").addEventListener("click",function(){ S.showUpload=!S.showUpload; S.upMsg=null; render(); });
+  $("uploadBtn").addEventListener("click",function(){ S.showUpload=!S.showUpload; S.upMsg=null; S.flash=null; render(); });
+  $("stamp").addEventListener("click",function(e){ var b=e.target.closest("[data-act]"); if(!b) return;
+    if(b.dataset.act==="openup"){ S.showUpload=true; S.upMsg=null; S.flash=null; render(); }
+    if(b.dataset.act==="forget"){ try{ localStorage.removeItem(STORE_KEY); }catch(er){} S.meta=null; S.dealer=""; S.flash=null; render(); } });
   $("main").addEventListener("click",function(e){
     var r=e.target.closest("[data-dealer]"); if(r){ openDealer(r.dataset.dealer); return; }
     var p=e.target.closest("[data-push]"); if(p){ S.push=p.dataset.push; render(); return; }
     var a=e.target.closest("[data-act]"); if(!a) return;
     var act=a.dataset.act;
-    if(act==="publish") publish();
-    else if(act==="cancelup"){ S.up=null; S.upMsg=null; render(); }
-    else if(act==="editcfg"){ S.editCfg=!S.editCfg; S.cfgMsg=null; render(); }
-    else if(act==="savecfg") saveCfg();
+    if(act==="openup"){ S.showUpload=true; S.upMsg=null; render(); window.scrollTo({top:0}); }
   });
 
   /* ---------- boot ---------- */
   S.tsm = ls("sp.tsm") || "";
   render();
-  (async function(){
-    var db=null, user=null;
-    try{ db = window.claude ? await claude.use("db") : null; }catch(e){ db=null; }
-    try{ user = window.claude ? await claude.use("user") : null; }catch(e){ user=null; }
-    S.db=db;
-    if(user){ try{ S.canEdit = await user.canEdit(); }catch(e){ S.canEdit=false; } }
-    if(!db){ S.loaded.data=true; S.loaded.cfg=true; render(); return; }
-    db.doc("portal/current").onSnapshot(function(snap){
-      S.loaded.data=true;
-      S.meta = snap.exists ? snap.data() : null;
-      if(S.meta && S.tsm && !S.meta.dealers.some(function(d){ return d.t===S.tsm; })) S.tsm="";
-      if(S.meta && S.dealer && !findDealer(S.dealer)) S.dealer="";
-      render();
-    }, function(){ S.loaded.data=true; render(); });
-    db.doc("portal/slabs").onSnapshot(function(snap){
-      S.loaded.cfg=true;
-      S.config = snap.exists ? (snap.data().config||null) : null;
-      render();
-    }, function(){ S.loaded.cfg=true; render(); });
-  })();
+  loadSlabs(); restore();
+  render();
 })();
 </script>
+</body>
+</html>
