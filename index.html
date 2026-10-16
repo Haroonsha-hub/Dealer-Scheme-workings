@@ -1,0 +1,952 @@
+<title>Dealer Scheme Portal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: charcoal header with a four-colour ribbon, airy pale ground, white cards; colour is used as small signals (KPI tops, slab swatches, the diary countdown). */
+:root{
+  --bg:#F5F4F8; --surface:#FFFFFF; --sunk:#F2F1F6; --ink:#2B2A28; --muted:#6B6875; --line:#E3E1EA;
+  --accent:#5B4FA8; --accent-ink:#FFFFFF; --accent-soft:#EEECF8;
+  --band:#2B2A28; --band-ink:#FFFFFF; --sun:#FFCE00; --sun-ink:#2B2A28; --sun-soft:#FFF7D6;
+  --plum:#5B4FA8; --plum-ink:#FFFFFF; --plum-soft:#EEECF8; --berry:#EE7F1D; --leaf:#009B48;
+  --good:#0E7F42; --good-soft:#E0F3E8; --warn:#A35A00; --warn-soft:#FDEEDC; --bad:#C2392F; --bad-soft:#FBE3E0;
+  --display:"Outfit","Avenir Next","Segoe UI",system-ui,sans-serif; --body:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121116; --surface:#1B1A21; --sunk:#16151B; --ink:#ECEAF2; --muted:#A19DAE; --line:#2C2A35;
+  --accent:#A99DF2; --accent-ink:#17132E; --accent-soft:#252140;
+  --band:#0D0C10; --band-ink:#FFFFFF; --sun:#FFD43B; --sun-ink:#2B2A28; --sun-soft:#2E2914;
+  --plum:#A99DF2; --plum-ink:#17132E; --plum-soft:#252140; --berry:#FF9A45; --leaf:#3CCB7C;
+  --good:#52C68C; --good-soft:#15301F; --warn:#F2B44C; --warn-soft:#33270F; --bad:#FF7B72; --bad-soft:#3A1A18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121116; --surface:#1B1A21; --sunk:#16151B; --ink:#ECEAF2; --muted:#A19DAE; --line:#2C2A35;
+  --accent:#A99DF2; --accent-ink:#17132E; --accent-soft:#252140;
+  --band:#0D0C10; --band-ink:#FFFFFF; --sun:#FFD43B; --sun-ink:#2B2A28; --sun-soft:#2E2914;
+  --plum:#A99DF2; --plum-ink:#17132E; --plum-soft:#252140; --berry:#FF9A45; --leaf:#3CCB7C;
+  --good:#52C68C; --good-soft:#15301F; --warn:#F2B44C; --warn-soft:#33270F; --bad:#FF7B72; --bad-soft:#3A1A18; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--band)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.92em}
+.muted{color:var(--muted)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--band);color:var(--band-ink);border-bottom:0}
+.top::after{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--leaf) 0 25%,var(--sun) 25% 50%,var(--plum) 50% 75%,var(--berry) 75%)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.fan{display:flex;gap:2px}
+.fan i{display:block;width:7px;height:24px;border-radius:3px}
+.fan i:nth-child(1){background:#2FB36A}.fan i:nth-child(2){background:var(--sun)}.fan i:nth-child(3){background:#7B5BD6}.fan i:nth-child(4){background:#F0524A}
+.brand h1{font-size:20px;font-weight:700;letter-spacing:-.01em;line-height:1;white-space:nowrap}
+.month{display:flex;flex-direction:column;line-height:1.2}
+.month b{font-size:13px}
+.month span{font-size:12px;opacity:.8}
+.month b{color:var(--sun)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:13px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.top .btn.primary{background:var(--sun);color:var(--sun-ink);border-color:var(--sun)}
+.btn{border-radius:999px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* selector */
+.pick{padding-block:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.4fr);gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0;position:relative}
+.field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.field select,.field input{width:100%;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:14px}
+.results{position:absolute;top:100%;left:0;right:0;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgb(0 0 0 / .14);z-index:4;overflow:hidden}
+.results button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:none;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}
+.results button:last-child{border-bottom:0}
+.results button:hover,.results button.on{background:var(--accent-soft)}
+.results small{color:var(--muted);white-space:nowrap}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom:3px solid var(--accent)}
+
+main{padding-block:18px 48px;display:flex;flex-direction:column;gap:18px}
+
+/* dealer head */
+.dhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px}
+.dhead h2{font-size:clamp(26px,3.6vw,36px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.dhead .meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:13px;margin-top:4px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.kpi .k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-top:4px}
+.kpi{position:relative;overflow:hidden;padding-left:18px}.kpi::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0}
+.kpi:nth-child(1)::before{background:var(--leaf)}.kpi:nth-child(2)::before{background:var(--sun)}.kpi:nth-child(3)::before{background:var(--plum)}.kpi:nth-child(4)::before{background:var(--berry)}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+
+.wins{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.win{border:1px solid var(--line);background:var(--sun-soft);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.win .t{font-size:12px;font-weight:700;color:var(--muted)}
+.win .b{font-weight:700}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sec-h h3{font-size:19px;font-weight:700;letter-spacing:-.01em}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-width:0;box-shadow:0 1px 2px rgb(40 30 80 / .04)}
+.card>header{padding:12px 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card>header h4{margin:0;font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+.card>header .p{font-size:12px;color:var(--muted)}
+.part{padding:12px 14px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line)}
+.part:last-of-type{border-bottom:0}
+.part .ph{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.part .ph b{font-size:13px}
+.basis{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.01em;line-height:1.1}
+.basis small{font-family:var(--body);font-size:12px;font-weight:500;color:var(--muted)}
+.line{font-size:13px}
+.line .lab{display:inline-block;min-width:70px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.note{font-size:12px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;background:var(--sunk);color:var(--muted);border:1px solid var(--line)}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+
+/* shade card ladder */
+.ladder{display:flex;gap:3px;overflow-x:auto;padding:8px 1px 2px}
+.sw{flex:1 0 58px;border-radius:6px;padding:6px 6px 5px;min-height:46px;display:flex;flex-direction:column;justify-content:space-between;position:relative;border:1px solid transparent;color:var(--ink)}
+.sw .m{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+.sw .r{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.sw.off{opacity:.42}
+.sw.cur{border-color:var(--sun);box-shadow:0 0 0 2px var(--sun)}
+.sw.nx{border:1px dashed var(--ink);opacity:.8}
+.sw .tag{position:absolute;top:-8px;right:4px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--plum);color:var(--plum-ink);padding:1px 5px;border-radius:4px}
+.sw.deep{color:var(--accent-ink)}
+.bar{height:8px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.gates{display:flex;flex-wrap:wrap;gap:6px}
+details.raw{border-top:1px solid var(--line)}
+details.raw summary{padding:9px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted)}
+.kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;padding:0 14px 12px;font-size:12.5px}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){text-align:right;font-variant-numeric:tabular-nums}
+
+.idle{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.idle div{display:flex;justify-content:space-between;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line);font-size:13px}
+.idle div:last-child{border-bottom:0}
+.idle span:last-child{color:var(--muted);text-align:right}
+
+/* tables */
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk);white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--accent-soft)}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* slab book */
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.book .card table th,.book .card table td{padding:6px 12px}
+
+/* empty + panels */
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.empty h3{font-size:22px}
+.empty p{margin:0;max-width:52ch;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--accent);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.panel h3{font-size:20px}
+.panel .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.drop{border:1.5px dashed var(--line);border-radius:var(--r);padding:18px;text-align:center;background:var(--sunk)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.stats div{background:var(--sunk);border-radius:8px;padding:8px 10px}
+.stats b{display:block;font-family:var(--display);font-size:24px;font-weight:700;color:var(--accent)}
+.msg{font-size:13px;padding:8px 10px;border-radius:8px}
+.msg.ok{background:var(--good-soft);color:var(--good)}
+.msg.err{background:var(--bad-soft);color:var(--bad)}
+.msg.info{background:var(--warn-soft);color:var(--warn)}
+textarea{width:100%;min-height:340px;font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);padding:10px}
+ul.plain{margin:0;padding-left:18px}
+
+/* highlight scheme banner */
+.promo{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:center;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;padding:18px 20px;position:relative;overflow:hidden}
+.promo::after{content:"";position:absolute;right:-60px;bottom:-70px;width:200px;height:200px;border-radius:50%;background:var(--sun);opacity:.18}
+.cal{width:96px;background:var(--sun);border-radius:16px;overflow:hidden;text-align:center;color:var(--sun-ink);flex:none}
+.cal::before{content:"";display:block;height:10px;background:var(--band)}
+.cal b{display:block;font-family:var(--display);font-size:46px;font-weight:800;line-height:1;padding-top:6px}
+.cal span{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 0 9px}
+.promo h3{font-size:clamp(22px,3vw,30px);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.promo .sub{font-size:13px;color:var(--muted);margin-top:4px}
+.promo .me{margin-top:10px;background:var(--plum-soft);border-radius:10px;padding:8px 10px;font-size:13px}
+.promo .me b{color:var(--accent)}
+.dslabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;position:relative;z-index:1}
+.dslabs div{background:var(--sunk);border-radius:12px;padding:6px 8px;text-align:center;border:2px solid transparent}
+.dslabs div.on{background:var(--sun);color:var(--sun-ink);border-color:var(--sun)}
+.dslabs div.nx{border:2px dashed var(--accent)}
+.dslabs small{display:block;font-size:11px;color:var(--muted)}
+.dslabs div.on small{color:var(--sun-ink)}
+.dslabs b{font-family:var(--display);font-size:20px;font-weight:700;line-height:1.1}
+@media (max-width:860px){.promo{grid-template-columns:auto minmax(0,1fr)}.dslabs{grid-column:1/-1}}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.pick{grid-template-columns:minmax(0,1fr)}.month{display:none}.brand h1{font-size:16px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>Birla Opus Dealer Scheme Dashboard</h1></div>
+    <div class="month" id="monthInfo"><b>Loading…</b><span>Fetching the latest scheme working</span></div>
+    <button class="btn primary" id="uploadBtn" hidden>Upload working</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="pick">
+    <div class="field"><label for="tsm">TSM</label><select id="tsm"><option value="">All TSMs</option></select></div>
+    <div class="field"><label for="dealer">Dealer</label><select id="dealer"><option value="">Select a dealer</option></select></div>
+    <div class="field"><label for="q">Search dealer</label><input id="q" type="search" placeholder="Dealer name or parent code" autocomplete="off"><div class="results" id="results" hidden></div></div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-dealer" data-tab="dealer" aria-selected="true">Dealer dashboard</button>
+    <button role="tab" id="tab-push" data-tab="push" aria-selected="false">Next-slab push list</button>
+    <button role="tab" id="tab-book" data-tab="book" aria-selected="false">Slab book</button>
+  </nav>
+</div>
+
+<main class="wrap" id="main">
+  <div class="empty"><h3>Loading scheme working…</h3><p>Dealer dashboards appear here once the latest file loads.</p></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* Scheme-working workbook parser. Pure: takes the SheetJS global and a workbook. */
+var SchemeParser = (function () {
+  function norm(s) {
+    return String(s == null ? "" : s).replace(/[\s ]+/g, " ").trim().toLowerCase();
+  }
+  function clean(s) {
+    return String(s == null ? "" : s).replace(/[\s ]+/g, " ").trim();
+  }
+  var IDENT = { "asm name": "a", "tsm name": "t", "tty": "y", "parent": "c", "parent code": "c", "parent name": "n" };
+
+  function parseWorkbook(XLSX, wb) {
+    var groups = [];          // {key, title, sheet, cols:[globalIndex]}
+    var cols = [];            // {g: groupIndex, h: header}
+    var dealers = {};         // code -> {c,n,t,y,a,v:{}}
+    var order = [];
+    var warnings = [];
+    var errorCells = 0;
+
+    wb.SheetNames.forEach(function (sheetName) {
+      var ws = wb.Sheets[sheetName];
+      var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null, blankrows: false });
+      var h = -1;
+      for (var i = 0; i < Math.min(rows.length, 15); i++) {
+        if ((rows[i] || []).some(function (v) { return norm(v) === "parent name"; })) { h = i; break; }
+      }
+      if (h < 0) return;
+      var head = rows[h] || [];
+      var top = h > 0 ? rows[h - 1] || [] : [];
+      var isOtc = /otc/i.test(sheetName);
+      var prefix = isOtc ? "OTC · " : "";
+      var identIdx = {};
+      var width = Math.max(head.length, top.length);
+      var curTitle = null;
+      var localCols = []; // [colIndexInSheet, globalIndex]
+      var groupByTitle = {};
+      for (var c = 0; c < width; c++) {
+        var hv = norm(head[c]);
+        if (top[c] != null && clean(top[c]) !== "") curTitle = clean(top[c]);
+        if (IDENT[hv] && identIdx[IDENT[hv]] == null && curTitle == null) { identIdx[IDENT[hv]] = c; continue; }
+        if (!hv) continue;
+        var title = curTitle == null ? (isOtc ? "Overall" : "Overall") : curTitle;
+        var key = prefix + title;
+        var gi = groupByTitle[key];
+        if (gi == null) {
+          gi = groups.length;
+          groupByTitle[key] = gi;
+          groups.push({ key: key, title: title, sheet: sheetName, otc: isOtc, cols: [] });
+        }
+        var g = cols.length;
+        cols.push({ g: gi, h: clean(head[c]) });
+        groups[gi].cols.push(g);
+        localCols.push([c, g]);
+      }
+      if (identIdx.n == null || identIdx.c == null) { warnings.push("Sheet \"" + sheetName + "\" skipped: no Parent / Parent Name column."); return; }
+      for (var r = h + 1; r < rows.length; r++) {
+        var row = rows[r] || [];
+        var name = clean(row[identIdx.n]);
+        var code = clean(row[identIdx.c]);
+        if (!name || !code) continue;
+        var d = dealers[code];
+        if (!d) {
+          d = dealers[code] = { c: code, n: name, t: "", y: "", a: "", v: {} };
+          order.push(code);
+        }
+        if (identIdx.t != null && clean(row[identIdx.t])) d.t = d.t || clean(row[identIdx.t]);
+        if (identIdx.y != null && clean(row[identIdx.y])) d.y = d.y || clean(row[identIdx.y]);
+        if (identIdx.a != null && clean(row[identIdx.a])) d.a = d.a || clean(row[identIdx.a]);
+        if (!isOtc) d.n = name; // prefer scheme sheet spelling
+        localCols.forEach(function (pair) {
+          var v = row[pair[0]];
+          if (v == null || v === "") return;
+          if (typeof v === "string") {
+            var s = v.trim();
+            if (/^#/.test(s)) { errorCells++; return; }
+            var num = Number(s.replace(/,/g, ""));
+            if (s !== "" && !isNaN(num)) v = num; else v = s;
+          } else if (typeof v === "boolean") {
+            v = v ? 1 : 0;
+          } else if (typeof v === "number" && !isFinite(v)) {
+            errorCells++; return;
+          }
+          if (typeof v === "number") {
+            if (v === 0) return;
+            v = Math.round(v * 10000) / 10000;
+          }
+          d.v[pair[1]] = v;
+        });
+      }
+    });
+
+    if (!order.length) throw new Error("No dealer rows found. The file needs a header row with \"Parent\" and \"Parent Name\" columns.");
+    if (errorCells) warnings.push(errorCells + " cells had Excel errors (like #VALUE!) and were treated as blank.");
+
+    // mark groups that are empty for every dealer
+    var used = {};
+    order.forEach(function (code) { Object.keys(dealers[code].v).forEach(function (k) { used[cols[k].g] = true; }); });
+    groups.forEach(function (g, i) { g.empty = !used[i]; });
+
+    var list = order.map(function (code) {
+      var d = dealers[code];
+      var v = [];
+      Object.keys(d.v).forEach(function (k) { v.push([Number(k), d.v[k]]); });
+      return { c: d.c, n: d.n, t: d.t || "Unassigned", y: d.y, a: d.a, v: v };
+    });
+    var tsms = {};
+    list.forEach(function (d) { tsms[d.t] = (tsms[d.t] || 0) + 1; });
+    return { groups: groups, cols: cols, dealers: list, tsms: tsms, warnings: warnings };
+  }
+  return { parseWorkbook: parseWorkbook, norm: norm };
+})();
+if (typeof module !== "undefined") module.exports = SchemeParser;
+
+</script>
+<script>
+/* Slab engine: works out qualified benefit and next slab per scheme part. Pure. */
+var SlabEngine = (function () {
+  function norm(s) { return String(s == null ? "" : s).replace(/[\s ]+/g, " ").trim().toLowerCase(); }
+  function num(v) { return typeof v === "number" && isFinite(v) ? v : 0; }
+  function asList(x) { return x == null ? [] : Array.isArray(x) ? x : [x]; }
+
+  function makeGetter(meta, group, vmap) {
+    var occ = {};
+    group.cols.forEach(function (gi) {
+      var k = norm(meta.cols[gi].h);
+      (occ[k] = occ[k] || []).push(gi);
+    });
+    function idxOf(ref) {
+      var m = /^(.*)#(\d+)$/.exec(ref);
+      var name = norm(m ? m[1] : ref), n = m ? Number(m[2]) : 1;
+      var arr = occ[name];
+      return arr && arr[n - 1] != null ? arr[n - 1] : null;
+    }
+    return {
+      has: function (ref) { return idxOf(ref) != null; },
+      raw: function (ref) { var i = idxOf(ref); return i == null ? undefined : vmap[i]; },
+      num: function (ref) { var i = idxOf(ref); return i == null ? 0 : num(vmap[i]); }
+    };
+  }
+
+  function rateOf(s) {
+    if (!s) return null;
+    if (s.pct != null) return { kind: "pct", v: s.pct };
+    if (s.amt != null) return { kind: "amt", v: s.amt };
+    if (s.perUnit != null) return { kind: "perUnit", v: s.perUnit };
+    if (s.gift != null) return { kind: "gift", v: s.gift };
+    return null;
+  }
+
+  function analyzeEvery(e, b, unit) {
+    var size = e.size, base = Math.max(b, 0);
+    var count = Math.floor(base / size + 1e-9);
+    var need = size - (base - count * size);
+    return {
+      type: "every", size: size, count: count,
+      amt: e.amt != null ? count * e.amt : null,
+      gift: e.gift != null && count > 0 ? (count > 1 ? count + " × " : "") + e.gift : null,
+      perAmt: e.amt, perGift: e.gift,
+      need: need, nextMin: (count + 1) * size,
+      ratio: need / size,
+      label: e.label || null, unit: unit
+    };
+  }
+
+  function analyzePart(p, get) {
+    var unit = p.unit || "L";
+    var b = 0;
+    asList(p.basis).forEach(function (ref) { b += get.num(ref); });
+    b = Math.round(b * 100) / 100;
+    var res = { label: p.label || "", unit: unit, basis: b, period: p.period || "", note: p.note || "", state: b > 0 ? "in" : "none" };
+
+    if (p.gates) {
+      res.gates = p.gates.map(function (gt) {
+        var v = 0; asList(gt.col).forEach(function (r) { v += get.num(r); });
+        return { label: gt.label, min: gt.min, val: Math.round(v * 100) / 100, ok: v >= gt.min };
+      });
+    }
+    if (p.giftCol) {
+      var gv = get.raw(p.giftCol);
+      if (gv != null && gv !== 0 && gv !== "") res.workingGift = typeof gv === "number" && p.giftUnit ? gv + " " + p.giftUnit : String(gv);
+    }
+
+    if (p.every) {
+      var e = analyzeEvery(p.every, b, unit);
+      res.mode = "every"; res.every = e;
+      res.qualifiedAmt = e.amt; res.qualifiedGift = e.gift;
+      var cnE = p.cnCol ? get.num(p.cnCol) : 0;
+      if (cnE) { res.workingAmt = cnE; }
+      res.next = { need: e.need, min: e.nextMin, amt: e.perAmt, gift: e.perGift, add: true };
+      res.ratio = e.ratio;
+      if (b <= 0) res.state = "none";
+      return res;
+    }
+
+    var slabs = (p.slabs || []).slice().sort(function (x, y) { return x.min - y.min; });
+    var shades = p.shadesCol ? get.num(p.shadesCol) : null;
+    res.shades = shades;
+    var idx = -1;
+    slabs.forEach(function (s, i) {
+      if (b >= s.min && (!s.shades || (shades || 0) >= s.shades)) idx = i;
+    });
+    var excelPct = p.pctCol ? get.num(p.pctCol) : 0;
+    res.excelPct = excelPct || null;
+    if (excelPct > 0) {
+      for (var j = slabs.length - 1; j >= 0; j--) {
+        if (slabs[j].pct != null && Math.abs(slabs[j].pct - excelPct) < 1e-6) { if (j > idx) { idx = j; res.byWorking = true; } break; }
+      }
+    }
+    var cur = idx >= 0 ? slabs[idx] : null;
+    res.slabs = slabs; res.idx = idx; res.cur = cur;
+    res.rate = rateOf(cur);
+    if (excelPct > 0 && (!res.rate || res.rate.kind !== "pct" || excelPct > res.rate.v + 1e-9)) {
+      res.rate = { kind: "pct", v: excelPct }; res.byWorking = true;
+    }
+
+    var cn = p.cnCol ? get.num(p.cnCol) : 0;
+    if (cn) res.workingAmt = cn;
+
+    var value = p.valueCol ? get.num(p.valueCol) : (unit === "₹" ? b : 0);
+    var vpu = null;
+    if (unit === "₹") vpu = 1;
+    else if (p.valueCol && b > 0 && value > 0) vpu = value / b;
+    else if (cn > 0 && res.rate && res.rate.kind === "pct" && res.rate.v > 0 && b > 0) vpu = cn / res.rate.v / b;
+    res.vpu = vpu;
+
+    // computed benefit for the current slab
+    if (res.rate) {
+      if (res.rate.kind === "pct") res.qualifiedAmt = value > 0 ? res.rate.v * value : (vpu ? res.rate.v * b * vpu : null);
+      else if (res.rate.kind === "amt") res.qualifiedAmt = res.rate.v;
+      else if (res.rate.kind === "perUnit") res.qualifiedAmt = res.rate.v * b;
+      else if (res.rate.kind === "gift") res.qualifiedGift = res.rate.v;
+    }
+
+    var next = slabs[idx + 1] || null;
+    if (p.beyond && b >= p.beyond.after) {
+      var k = Math.floor((b - p.beyond.after) / p.beyond.size + 1e-9);
+      var extra = k * p.beyond.amt;
+      res.qualifiedAmt = (res.qualifiedAmt || 0) + extra;
+      res.beyondCount = k;
+      var nm = p.beyond.after + (k + 1) * p.beyond.size;
+      res.next = { need: nm - b, min: nm, amt: p.beyond.amt, add: true };
+      res.ratio = res.next.need / p.beyond.size;
+    } else if (next) {
+      var nr = rateOf(next);
+      var n = { min: next.min, rate: nr, shades: next.shades || null };
+      if (b >= next.min) { n.need = 0; n.shadeNeed = (next.shades || 0) - (shades || 0); }
+      else n.need = Math.round((next.min - b) * 100) / 100;
+      if (nr) {
+        if (nr.kind === "pct") n.est = vpu ? nr.v * next.min * vpu : null;
+        else if (nr.kind === "amt") n.est = nr.v;
+        else if (nr.kind === "perUnit") n.est = nr.v * next.min;
+        else if (nr.kind === "gift") n.gift = nr.v;
+      }
+      n.approx = unit !== "₹" && nr && nr.kind === "pct";
+      res.next = n;
+      res.ratio = next.min > 0 ? n.need / next.min : 1;
+      if (n.need === 0 && n.shadeNeed > 0) res.ratio = 0.01;
+    } else if (cur) {
+      res.state = "top";
+    }
+    if (b > 0 && idx < 0) res.state = "below";
+    if (b <= 0) res.state = "none";
+
+    if (p.extra) {
+      res.extra = analyzeEvery(p.extra, b, unit);
+    }
+    return res;
+  }
+
+  function findCfg(config, group) {
+    if (!config || !config.schemes) return null;
+    var k = norm(group.key);
+    for (var i = 0; i < config.schemes.length; i++) {
+      if (norm(config.schemes[i].group) === k) return config.schemes[i];
+    }
+    return null;
+  }
+
+  function analyzeDealer(meta, dealer, config, today) {
+    var vmap = {};
+    dealer.v.forEach(function (pair) { vmap[pair[0]] = pair[1]; });
+    var out = { groups: [], gsr: null, cnTotal: 0, gifts: [], near: 0 };
+    meta.groups.forEach(function (g, gi) {
+      var cfg = findCfg(config, g);
+      if (g.empty && !cfg) return;
+      var get = makeGetter(meta, g, vmap);
+      var cells = g.cols.map(function (ci) { return { h: meta.cols[ci].h, v: vmap[ci] }; });
+      var active = cells.some(function (c) { return c.v != null && c.v !== 0; });
+      cells.forEach(function (c) {
+        var h = norm(c.h);
+        if (h === "gsr (b)") out.gsr = num(c.v);
+        if (/(^|\s)cn$/.test(h) && typeof c.v === "number") out.cnTotal += c.v;
+      });
+      var parts = cfg ? (cfg.parts || []).map(function (p) {
+        var r = analyzePart(p, get);
+        r.ends = p.ends || cfg.ends || null;
+        r.closed = !!(today && r.ends && today > r.ends);
+        return r;
+      }) : [];
+      parts.forEach(function (r) {
+        var gift = r.workingGift || r.qualifiedGift;
+        if (gift) out.gifts.push({ scheme: (cfg.name || g.title) + (r.label && cfg.parts.length > 1 ? " · " + r.label : ""), gift: gift, working: !!r.workingGift });
+        if (!r.closed && r.basis > 0 && r.next && r.ratio != null && r.ratio <= 0.2) out.near++;
+      });
+      if (!cfg) {
+        cells.forEach(function (c) {
+          if (/gift/.test(norm(c.h)) && c.v != null && c.v !== 0) out.gifts.push({ scheme: g.key, gift: typeof c.v === "number" ? c.v + " gift(s)" : String(c.v), working: true });
+        });
+      }
+      out.groups.push({
+        key: g.key, title: cfg && cfg.name ? cfg.name : g.key, sheetTitle: g.key, otc: g.otc,
+        period: cfg ? cfg.period || "" : "", note: cfg ? cfg.note || "" : "",
+        configured: !!cfg, active: active, parts: parts, cells: cells,
+        overall: norm(g.title) === "overall", highlight: !!(cfg && cfg.highlight), ends: cfg ? cfg.ends || null : null
+      });
+    });
+    return out;
+  }
+
+  return { analyzeDealer: analyzeDealer, analyzePart: analyzePart, norm: norm };
+})();
+if (typeof module !== "undefined") module.exports = SlabEngine;
+
+</script>
+<script>
+(function(){
+  "use strict";
+  var S = { meta:null, config:null, loaded:{data:false,cfg:false}, canEdit:false, db:null,
+            tsm:"", dealer:"", tab:"dealer", push:"25", showUpload:false, up:null, upMsg:null, cfgMsg:null, editCfg:false };
+  var $ = function(id){ return document.getElementById(id); };
+  var today = (function(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); })();
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];}); }
+  function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v);}catch(e){ return null; } }
+  function inr(n){ if(n==null||isNaN(n)) return "—"; var r=Math.round(n); return (r<0?"−₹":"₹")+Math.abs(r).toLocaleString("en-IN"); }
+  function nfmt(n){ return Number(n).toLocaleString("en-IN",{maximumFractionDigits:2}); }
+  function qty(n,u){ return u==="₹" ? inr(n) : nfmt(n)+" "+u; }
+  function pct(v){ return (Math.round(v*10000)/100).toString()+"%"; }
+  function rateText(r,u){ if(!r) return "—"; if(r.kind==="pct") return pct(r.v); if(r.kind==="amt") return inr(r.v); if(r.kind==="perUnit") return inr(r.v)+"/"+(u==="₹"?"unit":u); return r.v; }
+  function minText(m,u){ return u==="₹" ? (m>=100000? "₹"+(m/100000).toLocaleString("en-IN",{maximumFractionDigits:2})+"L" : m>=1000? "₹"+(m/1000).toLocaleString("en-IN",{maximumFractionDigits:1})+"K" : "₹"+m) : nfmt(m)+" "+u; }
+  function fmtDate(iso){ try{ return new Date(iso).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); }catch(e){ return iso; } }
+  function endText(e){ if(!e) return ""; var d=new Date(e+"T00:00:00"); return d.toLocaleDateString("en-IN",{day:"numeric",month:"short"}); }
+
+  function dealers(){ return S.meta ? S.meta.dealers : []; }
+  function tsmList(){ var m={}; dealers().forEach(function(d){ m[d.t]=(m[d.t]||0)+1; }); return Object.keys(m).sort().map(function(k){ return [k,m[k]]; }); }
+  function scoped(){ return dealers().filter(function(d){ return !S.tsm || d.t===S.tsm; }).slice().sort(function(a,b){ return a.n.localeCompare(b.n); }); }
+  function findDealer(c){ return dealers().find(function(d){ return d.c===c; }) || null; }
+  function analyze(d){ return SlabEngine.analyzeDealer(S.meta, d, S.config, today); }
+
+  /* ---------- header & selectors ---------- */
+  function renderTop(){
+    var mi=$("monthInfo");
+    if(S.meta){ mi.innerHTML="<b>"+esc(S.meta.month||"Scheme working")+"</b><span>Updated "+esc(fmtDate(S.meta.uploadedAt))+"</span>"; }
+    else if(S.loaded.data){ mi.innerHTML="<b>No working yet</b><span>Waiting for the first upload</span>"; }
+    $("uploadBtn").hidden = !S.canEdit;
+    $("uploadBtn").textContent = S.showUpload ? "Close upload" : "Upload working";
+    var ts=$("tsm"), list=tsmList();
+    ts.innerHTML='<option value="">All TSMs ('+dealers().length+' dealers)</option>'+list.map(function(t){ return '<option value="'+esc(t[0])+'"'+(t[0]===S.tsm?" selected":"")+'>'+esc(t[0])+' ('+t[1]+')</option>'; }).join("");
+    var ds=$("dealer"), sc=scoped();
+    ds.innerHTML='<option value="">'+(sc.length? "Select a dealer ("+sc.length+")" : "No dealers")+'</option>'+sc.map(function(d){ return '<option value="'+esc(d.c)+'"'+(d.c===S.dealer?" selected":"")+'>'+esc(d.n)+'</option>'; }).join("");
+    document.querySelectorAll(".tabs button").forEach(function(b){ b.setAttribute("aria-selected", String(b.dataset.tab===S.tab)); });
+  }
+
+  /* ---------- part rendering ---------- */
+  function stateChip(r){
+    if(r.closed) return '<span class="chip">Closed '+esc(endText(r.ends))+'</span>';
+    if(r.basis<=0) return '<span class="chip">Not billed</span>';
+    if(r.state==="top") return '<span class="chip good">Top slab</span>';
+    if(r.next && r.ratio!=null && r.ratio<=0.1) return '<span class="chip warn">Very close</span>';
+    if(r.next && r.ratio!=null && r.ratio<=0.25) return '<span class="chip acc">Close</span>';
+    if(r.state==="below") return '<span class="chip">Below first slab</span>';
+    return '<span class="chip good">Qualified</span>';
+  }
+  function ladder(r){
+    var n=r.slabs.length; if(!n) return "";
+    return '<div class="ladder" role="img" aria-label="Slab ladder">'+r.slabs.map(function(s,i){
+      var t = n===1 ? 70 : Math.round(16 + i*(74/(n-1)));
+      var cls="sw"+(i<=r.idx?"":" off")+(i===r.idx?" cur":"")+(i===r.idx+1&&!r.closed&&r.basis>0?" nx":"")+(t>=55?" deep":"");
+      var tag = i===r.idx ? '<span class="tag">Now</span>' : (i===r.idx+1&&!r.closed&&r.basis>0 ? '<span class="tag">Next</span>' : "");
+      var rate = s.pct!=null?pct(s.pct): s.amt!=null? inr(s.amt) : s.perUnit!=null? inr(s.perUnit)+"/"+r.unit : (s.gift||"");
+      if(s.gift && rate.length>14) rate="Gift";
+      return '<div class="'+cls+'" style="background:color-mix(in oklab,var(--accent) '+t+'%,var(--surface))">'+tag+'<span class="m">'+esc(minText(s.min,r.unit))+(s.shades?" · "+s.shades+"sh":"")+'</span><span class="r">'+esc(rate)+'</span></div>';
+    }).join("")+'</div>';
+  }
+  function benefitNow(r){
+    var src = r.workingAmt ? ' <span class="muted">(as per working)</span>' : ' <span class="muted">(calculated)</span>';
+    if(r.mode==="every"){
+      var e=r.every;
+      if(r.workingAmt) return inr(r.workingAmt)+src;
+      if(e.count<=0) return '<span class="muted">Not yet</span>';
+      if(e.perAmt!=null) return e.count+" × "+inr(e.perAmt)+" = <b>"+inr(e.amt)+"</b>"+src;
+      return "<b>"+esc(e.gift)+"</b>";
+    }
+    var parts=[];
+    if(r.rate){
+      if(r.rate.kind==="gift") parts.push("<b>"+esc(r.workingGift||r.rate.v)+"</b>");
+      else {
+        var amt = r.workingAmt || r.qualifiedAmt;
+        var head = r.rate.kind==="pct" ? "<b>"+pct(r.rate.v)+"</b>" : "";
+        if(amt) parts.push((head? head+" → ":"")+"<b>"+inr(amt)+"</b>"+src);
+        else parts.push(head+' <span class="muted">(amount shows in the working once updated)</span>');
+      }
+      if(r.byWorking) parts.push('<span class="muted">rate as per working sheet</span>');
+    } else if(r.workingGift){ parts.push("<b>"+esc(r.workingGift)+"</b>"); }
+    else parts.push('<span class="muted">Not yet qualified</span>');
+    return parts.join(" · ");
+  }
+  function nextLine(r){
+    if(r.closed) return '<span class="muted">Scheme window closed on '+esc(endText(r.ends))+'.</span>';
+    var n=r.next;
+    if(!n) return r.state==="top" ? '<span class="muted">Highest slab reached.</span>' : '<span class="muted">No further slab.</span>';
+    if(n.add){
+      var what = n.amt!=null ? "another "+inr(n.amt) : "another "+esc(n.gift);
+      return 'Bill <b>'+esc(qty(n.need,r.unit))+'</b> more for '+what+' <span class="muted">(at '+esc(qty(n.min,r.unit))+')</span>';
+    }
+    if(n.need===0 && n.shadeNeed>0) return 'Volume reached for '+esc(rateText(n.rate,r.unit))+'. Bill <b>'+n.shadeNeed+' more shade'+(n.shadeNeed>1?"s":"")+'</b> ('+(r.shades||0)+' of '+n.shades+').';
+    var s='<b>'+esc(rateText(n.rate,r.unit))+'</b> at '+esc(qty(n.min,r.unit))+' · bill <b>'+esc(qty(n.need,r.unit))+'</b> more';
+    if(n.shades && (r.shades||0)<n.shades) s+=' and reach '+n.shades+' shades ('+(r.shades||0)+' now)';
+    if(n.est) s+=' · '+(n.approx?"≈ ":"")+inr(n.est)+' CN at that level';
+    return s;
+  }
+  function renderPart(r, multi){
+    var h='<div class="part">';
+    h+='<div class="ph"><b>'+esc(multi? r.label : (r.label||""))+(r.period?' <span class="muted" style="font-weight:500">· '+esc(r.period)+'</span>':'')+'</b>'+stateChip(r)+'</div>';
+    h+='<div class="basis num">'+esc(qty(r.basis,r.unit))+' <small>'+(r.unit==="₹"?"GSR":"billed")+(r.shades!=null?" · "+r.shades+" shades":"")+'</small></div>';
+    if(r.mode==="every"){
+      var e=r.every, pctDone = Math.max(0,Math.min(100, (1 - e.need/e.size)*100));
+      h+='<div class="bar" aria-hidden="true"><i style="width:'+pctDone.toFixed(1)+'%"></i></div>';
+      h+='<div class="note">Every '+esc(qty(e.size,r.unit))+' earns '+(e.perAmt!=null?inr(e.perAmt):esc(e.perGift))+'</div>';
+    } else h+=ladder(r);
+    h+='<div class="line"><span class="lab">Earned</span> '+benefitNow(r)+'</div>';
+    h+='<div class="line"><span class="lab">Next</span> '+nextLine(r)+'</div>';
+    if(r.extra){
+      var x=r.extra;
+      h+='<div class="line"><span class="lab">Bonus</span> '+esc(x.label||"Fixed CN")+': '+(x.count>0? x.count+" × "+inr(x.perAmt)+" = <b>"+inr(x.amt)+"</b>" : "none yet")+(r.closed?"":' · '+esc(qty(x.need,r.unit))+' to the next '+inr(x.perAmt))+'</div>';
+    }
+    if(r.gates) h+='<div class="gates">'+r.gates.map(function(g){ return '<span class="chip '+(g.ok?"good":"bad")+'">'+(g.ok?"✓ ":"✗ ")+esc(g.label)+' · '+esc(nfmt(g.val))+'</span>'; }).join("")+'</div>';
+    if(r.note) h+='<div class="note">'+esc(r.note)+'</div>';
+    return h+'</div>';
+  }
+  function cellVal(v){ if(v==null) return "0"; if(typeof v==="number") return Math.abs(v)<1 && v!==0 ? (Math.round(v*10000)/100)+"%" : nfmt(v); return esc(v); }
+  function rawBlock(g){
+    return '<details class="raw"><summary>Working sheet figures ('+g.cells.length+')</summary><div class="kv">'+g.cells.map(function(c){ return '<span>'+esc(c.h)+'</span><span>'+cellVal(c.v)+'</span>'; }).join("")+'</div></details>';
+  }
+  function renderCard(g){
+    var activeParts = g.parts.filter(function(p){ return p.basis>0 || p.workingAmt || p.workingGift; });
+    var idleParts = g.parts.filter(function(p){ return activeParts.indexOf(p)<0; });
+    var h='<article class="card"><header><div><h4>'+esc(g.title)+'</h4><div class="p">'+esc(g.period||(g.otc?"OTC scheme":""))+(g.title!==g.sheetTitle?' · <span class="mono">'+esc(g.sheetTitle)+'</span>':'')+'</div></div></header>';
+    if(g.configured){
+      activeParts.forEach(function(p){ h+=renderPart(p, g.parts.length>1); });
+      if(idleParts.length) h+='<div class="part"><div class="note">Not billed yet: '+idleParts.map(function(p){ return esc(p.label)+(p.slabs&&p.slabs[0]? " (from "+esc(minText(p.slabs[0].min,p.unit))+")" : p.every? " (every "+esc(qty(p.every.size,p.unit))+")" : ""); }).join(", ")+'</div></div>';
+    } else {
+      h+='<div class="kv" style="padding-top:12px">'+g.cells.filter(function(c){ return c.v!=null&&c.v!==0; }).map(function(c){ return '<span>'+esc(c.h)+'</span><span>'+cellVal(c.v)+'</span>'; }).join("")+'</div><div class="part" style="padding-top:0"><div class="note">No slab rules set for this block, so these are the working sheet figures as uploaded.</div></div>';
+    }
+    if(g.configured) h+=rawBlock(g);
+    return h+'</article>';
+  }
+  function firstSlabText(g){
+    var p=g.parts[0]; if(!p) return "";
+    if(p.every) return "Every "+qty(p.every.size,p.unit)+" → "+(p.every.perAmt!=null?inr(p.every.perAmt):p.every.perGift);
+    var s=p.slabs&&p.slabs[0]; if(!s) return "";
+    return "From "+minText(s.min,p.unit)+" → "+rateText({kind:s.pct!=null?"pct":s.amt!=null?"amt":s.perUnit!=null?"perUnit":"gift",v:s.pct!=null?s.pct:s.amt!=null?s.amt:s.perUnit!=null?s.perUnit:s.gift},p.unit);
+  }
+
+  function daysLeft(ends){ if(!ends) return null; var a=new Date(today+"T00:00:00"), b=new Date(ends+"T00:00:00"); return Math.round((b-a)/864e5)+1; }
+  function promo(dealer){
+    var c=S.config; if(!c||!c.schemes) return "";
+    var s=c.schemes.find(function(x){ return x.highlight; }); if(!s||!s.parts||!s.parts[0]) return "";
+    var dl=daysLeft(s.ends); if(dl==null||dl<1) return "";
+    var p=s.parts[0], u=p.unit||"L", r=null;
+    if(dealer){ var a=analyze(dealer); var g=a.groups.find(function(x){ return x.highlight; }); r=g&&g.parts[0]; }
+    var me="";
+    if(r){
+      var now = r.workingGift || (r.rate? r.rate.v : null);
+      me='<div class="me">'+esc(dealer.n)+': '+(now?'<b>'+esc(now)+'</b> qualified':'not qualified yet')+(r.next? ' · bill <b>'+esc(qty(r.next.need,u))+'</b> more for <b>'+esc(r.next.gift||"")+'</b>' : r.basis>0?' · top slab reached':'')+'</div>';
+    } else {
+      var sc=scoped(), q=0, close=0;
+      sc.forEach(function(d){ var a=analyze(d); var g=a.groups.find(function(x){return x.highlight;}); var pr=g&&g.parts[0]; if(!pr) return; if(pr.workingGift||pr.rate) q++; if(pr.next && pr.ratio<=0.25 && pr.basis>0) close++; });
+      me='<div class="me">'+(S.tsm?esc(S.tsm)+': ':'All TSMs: ')+'<b>'+q+'</b> of '+sc.length+' dealers qualified · <b>'+close+'</b> within 25% of the next slab</div>';
+    }
+    var idx = r? r.idx : -2;
+    var tiles=(p.slabs||[]).map(function(sl,i){ return '<div class="'+(i===idx?"on":i===idx+1&&r&&r.basis>0?"nx":"")+'"><small>'+esc(minText(sl.min,u))+(i===p.slabs.length-1?"+":"")+'</small><b>'+esc(String(sl.gift||"").replace(/\s*diaries$/,""))+'</b></div>'; }).join("");
+    return '<section class="promo" aria-label="'+esc(s.name)+'"><div class="cal"><b class="num">'+dl+'</b><span>'+(dl===1?"day left":"days left")+'</span></div>'+
+      '<div><h3>'+esc(s.name)+'</h3><div class="sub">'+esc(s.period||"")+' · '+esc(p.label||"")+' · ends '+esc(endText(s.ends))+'</div>'+me+'</div>'+
+      '<div class="dslabs" aria-label="Slabs: GSR to diaries">'+tiles+'</div></section>';
+  }
+
+  /* ---------- views ---------- */
+  function emptyState(){
+    if(!S.loaded.data) return '<div class="empty"><h3>Loading scheme working…</h3><p>Dealer dashboards appear here once the latest file loads.</p></div>';
+    if(!S.db) return '<div class="empty"><h3>Sign in to see scheme figures</h3><p>This portal reads the shared scheme working, which needs a signed-in Claude account with access to this page.</p></div>';
+    return '<div class="empty"><h3>No scheme working uploaded yet</h3><p>'+(S.canEdit? 'Use <b>Upload working</b> at the top to load this month’s Excel. TSMs will see dealer dashboards as soon as it is published.' : 'Your ASM has not uploaded this month’s working yet. Check back after the next update.')+'</p></div>';
+  }
+  function viewDealer(){
+    var d=findDealer(S.dealer);
+    if(!d){
+      var sc=scoped();
+      var h=promo(null)+'<div class="empty"><h3>Pick a dealer</h3><p>Choose your name under TSM, then pick a dealer from the list or search by name or parent code. Every scheme for that dealer shows here with what is earned and what the next slab needs.</p></div>';
+      if(sc.length){
+        h+='<div class="sec-h"><h3>'+(S.tsm?esc(S.tsm)+"’s dealers":"All dealers")+'</h3><span class="muted">'+sc.length+' dealers · tap one to open</span></div>';
+        h+='<div class="tw"><table><thead><tr><th>Dealer</th><th>Parent</th><th>TSM</th><th class="n">Month GSR</th><th class="n">CN earned</th><th class="n">Close to next slab</th></tr></thead><tbody>'+
+          sc.map(function(x){ var a=analyze(x); return '<tr class="click" data-dealer="'+esc(x.c)+'"><td>'+esc(x.n)+'</td><td class="mono">'+esc(x.c)+'</td><td>'+esc(x.t)+'</td><td class="n">'+(a.gsr!=null?inr(a.gsr):"—")+'</td><td class="n">'+inr(a.cnTotal)+'</td><td class="n">'+(a.near||"—")+'</td></tr>'; }).join("")+'</tbody></table></div>';
+      }
+      return h;
+    }
+    var a=analyze(d);
+    var h=promo(d)+'<div class="dhead"><div><h2>'+esc(d.n)+'</h2><div class="meta"><span class="mono">'+esc(d.c)+'</span>'+(d.y?'<span>Territory '+esc(d.y)+'</span>':'')+'<span>TSM '+esc(d.t)+'</span>'+(d.a?'<span>ASM '+esc(d.a)+'</span>':'')+'</div></div></div>';
+    var gifts=a.gifts;
+    h+='<div class="kpis">'+
+      '<div class="kpi"><div class="k">Month GSR</div><div class="v num">'+(a.gsr!=null?inr(a.gsr):"—")+'</div><div class="s">Gross sales as per working</div></div>'+
+      '<div class="kpi"><div class="k">CN earned</div><div class="v num">'+inr(a.cnTotal)+'</div><div class="s">Sum of CN columns in the working</div></div>'+
+      '<div class="kpi"><div class="k">Gifts qualified</div><div class="v num">'+gifts.length+'</div><div class="s">'+(gifts.length? esc(gifts.map(function(g){return g.gift;}).join(", ")) : "None yet")+'</div></div>'+
+      '<div class="kpi"><div class="k">Close to next slab</div><div class="v num">'+a.near+'</div><div class="s">Within 20% of the next slab</div></div>'+
+    '</div>';
+    // quick wins
+    var wins=[];
+    a.groups.forEach(function(g){ g.parts.forEach(function(p){ if(!p.closed && p.basis>0 && p.next && p.ratio!=null) wins.push({g:g,p:p}); }); });
+    wins.sort(function(x,y){ return x.p.ratio-y.p.ratio; });
+    if(wins.length){
+      h+='<div class="sec-h"><h3>Closest next slabs</h3><span class="muted">Smallest balance first</span></div><div class="wins">'+wins.slice(0,3).map(function(w){
+        return '<div class="win"><span class="t">'+esc(w.g.title)+(w.g.parts.length>1?" · "+esc(w.p.label):"")+'</span><span class="b">'+nextLine(w.p)+'</span></div>';
+      }).join("")+'</div>';
+    }
+    var act=a.groups.filter(function(g){ return !g.overall && (g.active || g.parts.some(function(p){return p.basis>0;})); }).sort(function(x,y){ return (y.highlight?1:0)-(x.highlight?1:0); });
+    var idle=a.groups.filter(function(g){ return !g.overall && act.indexOf(g)<0 && g.configured; });
+    h+='<div class="sec-h"><h3>Schemes with billing</h3><span class="muted">'+act.length+' schemes</span></div>';
+    h+= act.length ? '<div class="grid">'+act.map(renderCard).join("")+'</div>' : '<div class="empty"><p>No billing against any scheme yet this month.</p></div>';
+    if(idle.length){
+      h+='<div class="sec-h"><h3>Not billed yet</h3><span class="muted">'+idle.length+' schemes · first slab shown</span></div><div class="idle">'+idle.map(function(g){
+        var closed = g.parts.length && g.parts.every(function(p){return p.closed;});
+        return '<div><span>'+esc(g.title)+(g.period?' <span class="muted">· '+esc(g.period)+'</span>':'')+'</span><span>'+(closed?"Closed":esc(firstSlabText(g)))+'</span></div>';
+      }).join("")+'</div>';
+    }
+    return h;
+  }
+  function viewPush(){
+    var sc=scoped(), rows=[];
+    sc.forEach(function(d){ var a=analyze(d); a.groups.forEach(function(g){ g.parts.forEach(function(p){
+      if(p.closed || p.basis<=0 || !p.next || p.ratio==null) return;
+      rows.push({d:d,g:g,p:p});
+    }); }); });
+    rows.sort(function(x,y){ return x.p.ratio-y.p.ratio; });
+    var lim = S.push==="all"?Infinity:Number(S.push)/100;
+    var shown=rows.filter(function(r){ return r.p.ratio<=lim; });
+    var h=promo(null)+'<div class="sec-h"><h3>'+(S.tsm?esc(S.tsm)+": ":"")+'dealers closest to the next slab</h3><div class="filters" role="group" aria-label="Distance to next slab">'+
+      [["10","Within 10%"],["25","Within 25%"],["all","All open slabs"]].map(function(f){ return '<button data-push="'+f[0]+'" aria-pressed="'+(S.push===f[0])+'">'+f[1]+'</button>'; }).join("")+'</div></div>';
+    h+='<p class="muted" style="margin:0">Balance is how much more the dealer must bill to move up one slab. Closed scheme windows are left out. Tap a row to open the dealer.</p>';
+    if(!shown.length) return h+'<div class="empty"><p>No open slabs in this range. Try a wider filter.</p></div>';
+    h+='<div class="tw"><table><thead><tr><th>Dealer</th>'+(S.tsm?"":"<th>TSM</th>")+'<th>Scheme</th><th class="n">Billed</th><th class="n">Now</th><th class="n">Next slab</th><th class="n">Balance</th><th>At next slab</th></tr></thead><tbody>'+
+      shown.slice(0,300).map(function(r){
+        var p=r.p, n=p.next;
+        var now = p.mode==="every" ? (p.every.count? p.every.count+" × "+(p.every.perAmt!=null?inr(p.every.perAmt):"gift") : "—") : rateText(p.rate,p.unit);
+        var nx = n.add ? qty(n.min,p.unit) : rateText(n.rate,p.unit)+" @ "+minText(n.min,p.unit);
+        var bal = n.need===0 && n.shadeNeed>0 ? n.shadeNeed+" shade(s)" : qty(n.need,p.unit);
+        var gain = n.add ? (n.amt!=null?"+"+inr(n.amt):n.gift) : n.gift ? n.gift : n.est ? (n.approx?"≈ ":"")+inr(n.est)+" CN" : "";
+        return '<tr class="click" data-dealer="'+esc(r.d.c)+'"><td>'+esc(r.d.n)+'</td>'+(S.tsm?"":'<td>'+esc(r.d.t)+'</td>')+'<td>'+esc(r.g.title)+(r.g.parts.length>1?' <span class="muted">· '+esc(p.label)+'</span>':'')+'</td><td class="n">'+esc(qty(p.basis,p.unit))+'</td><td class="n">'+esc(now)+'</td><td class="n">'+esc(nx)+'</td><td class="n"><b>'+esc(bal)+'</b></td><td>'+esc(gain)+'</td></tr>';
+      }).join("")+'</tbody></table></div>';
+    if(shown.length>300) h+='<p class="muted">Showing the closest 300 of '+shown.length+'.</p>';
+    return h;
+  }
+  function slabRows(p){
+    var u=p.unit||"L";
+    if(p.every) return '<tr><td>Every '+esc(qty(p.every.size,u))+'</td><td class="n">'+esc(p.every.amt!=null?inr(p.every.amt):p.every.gift)+'</td></tr>';
+    var r=(p.slabs||[]).map(function(s,i,arr){ var nx=arr[i+1]; var range = nx? nfmt(s.min)+" – "+nfmt(nx.min - (u==="₹"?1:0.01)) : "≥ "+nfmt(s.min); return '<tr><td>'+esc(range)+' '+esc(u==="₹"?"":u)+(s.shades?' · '+s.shades+' shades':'')+'</td><td class="n">'+esc(s.pct!=null?pct(s.pct):s.amt!=null?inr(s.amt):s.perUnit!=null?inr(s.perUnit)+"/"+u:s.gift)+'</td></tr>'; }).join("");
+    if(p.beyond) r+='<tr><td>Every '+p.beyond.size+' '+esc(u)+' above '+p.beyond.after+'</td><td class="n">+'+inr(p.beyond.amt)+'</td></tr>';
+    if(p.extra) r+='<tr><td>'+esc(p.extra.label||"Fixed CN")+'</td><td class="n">'+inr(p.extra.amt)+' / '+p.extra.size+' '+esc(u)+'</td></tr>';
+    return r;
+  }
+  function viewBook(){
+    var c=S.config;
+    var h='<div class="sec-h"><h3>Slab book'+(c&&c.month?" · "+esc(c.month):"")+'</h3>'+(S.canEdit?'<button class="btn" data-act="editcfg">'+(S.editCfg?"Close editor":"Edit slab rules")+'</button>':'')+'</div>';
+    if(c&&c.letter) h+='<p class="muted" style="margin:0">Scheme letter '+esc(c.letter)+'. These slabs drive the “Next” lines on every dealer dashboard.</p>';
+    if(S.canEdit && S.editCfg){
+      h+='<div class="panel"><h3>Slab rules</h3><p class="muted" style="margin:0">Each entry matches a scheme heading in row 1 of the working sheet (<span class="mono">group</span>) and points to its column headings. Edit numbers, then save. Changes apply to every dealer at once.</p>'+
+        '<textarea id="cfgText" spellcheck="false">'+esc(JSON.stringify(c||{month:"",schemes:[]},null,1))+'</textarea>'+
+        '<div class="row"><button class="btn primary" data-act="savecfg">Save slab rules</button></div>'+(S.cfgMsg?'<div class="msg '+S.cfgMsg[0]+'">'+esc(S.cfgMsg[1])+'</div>':'')+'</div>';
+    }
+    if(!c||!c.schemes||!c.schemes.length) return h+'<div class="empty"><p>No slab rules saved yet. Dealer dashboards still show working-sheet figures; next-slab lines appear once rules are added.</p></div>';
+    h+='<div class="book">'+c.schemes.map(function(s){
+      return '<article class="card"><header><div><h4>'+esc(s.name||s.group)+'</h4><div class="p">'+esc(s.period||"")+(s.ends?" · ends "+esc(endText(s.ends)):"")+'</div></div></header>'+
+        s.parts.map(function(p){ return '<div class="part" style="gap:6px"><b style="font-size:13px">'+esc(p.label||"")+(p.period?' <span class="muted" style="font-weight:500">· '+esc(p.period)+'</span>':'')+'</b><table><tbody>'+slabRows(p)+'</tbody></table>'+(p.note?'<div class="note">'+esc(p.note)+'</div>':'')+'</div>'; }).join("")+'</article>';
+    }).join("")+'</div>';
+    return h;
+  }
+  function viewUpload(){
+    var h='<section class="panel" aria-labelledby="upH"><h3 id="upH">Upload scheme working</h3>'+
+      '<p class="muted" style="margin:0">Choose the monthly scheme-working Excel. The portal reads every sheet with a <b>Parent</b> and <b>Parent Name</b> header row (Scheme Working and OTC Working), with scheme names in the row above. Publishing replaces the current figures for all TSMs.</p>'+
+      '<label class="drop" id="drop" for="file"><b>Choose Excel file</b><br><span class="muted">or drop it here · .xlsx, .xls, .xlsm</span></label><input id="file" type="file" accept=".xlsx,.xls,.xlsm" hidden>';
+    var u=S.up;
+    if(u&&u.parsed){
+      var p=u.parsed, cfg=S.config||{schemes:[]};
+      var keys=p.groups.filter(function(g){return !g.empty;}).map(function(g){return SlabEngine.norm(g.key);});
+      var matched=cfg.schemes.filter(function(s){ return p.groups.some(function(g){ return SlabEngine.norm(g.key)===SlabEngine.norm(s.group); }); });
+      var noRules=p.groups.filter(function(g){ return !g.empty && g.title!=="Overall" && !cfg.schemes.some(function(s){ return SlabEngine.norm(s.group)===SlabEngine.norm(g.key); }); });
+      var noBlock=cfg.schemes.filter(function(s){ return matched.indexOf(s)<0; });
+      h+='<div class="stats"><div><b class="num">'+p.dealers.length+'</b>dealers</div><div><b class="num">'+Object.keys(p.tsms).length+'</b>TSMs</div><div><b class="num">'+keys.length+'</b>scheme blocks with data</div><div><b class="num">'+matched.length+'</b>matched to slab rules</div></div>';
+      h+='<div class="note">File: <span class="mono">'+esc(u.fileName)+'</span> · TSMs: '+esc(Object.keys(p.tsms).map(function(t){return t+" ("+p.tsms[t]+")";}).join(", "))+'</div>';
+      if(noRules.length) h+='<div class="msg info">No slab rules for: '+esc(noRules.map(function(g){return g.key;}).join(", "))+'. These show as working-sheet figures only.</div>';
+      if(noBlock.length) h+='<div class="msg info">Slab rules with no matching block in this file: '+esc(noBlock.map(function(s){return s.group;}).join(", "))+'. If a heading was renamed, update it in the slab book.</div>';
+      p.warnings.forEach(function(w){ h+='<div class="msg info">'+esc(w)+'</div>'; });
+      h+='<div class="row"><div class="field" style="flex:1;min-width:200px"><label for="monthLabel">Month label</label><input id="monthLabel" value="'+esc(u.month)+'"></div><button class="btn primary" data-act="publish"'+(u.busy?" disabled":"")+'>'+(u.busy?"Publishing…":"Publish to TSMs")+'</button><button class="btn" data-act="cancelup">Discard</button></div>';
+    }
+    if(S.upMsg) h+='<div class="msg '+S.upMsg[0]+'">'+esc(S.upMsg[1])+'</div>';
+    h+='<p class="note" style="margin:0">Only people with Editor access to this page can upload or change slab rules. Share the page with TSMs as Viewers.</p></section>';
+    return h;
+  }
+  function render(){
+    renderTop();
+    var h="";
+    if(S.canEdit && S.showUpload) h+=viewUpload();
+    if(!S.meta) h+= S.tab==="book" ? viewBook() : emptyState();
+    else h+= S.tab==="dealer" ? viewDealer() : S.tab==="push" ? viewPush() : viewBook();
+    $("main").innerHTML=h;
+    var f=$("file"); if(f) f.addEventListener("change",function(){ if(f.files[0]) readFile(f.files[0]); });
+    var dz=$("drop");
+    if(dz){
+      dz.addEventListener("dragover",function(e){ e.preventDefault(); dz.classList.add("over"); });
+      dz.addEventListener("dragleave",function(){ dz.classList.remove("over"); });
+      dz.addEventListener("drop",function(e){ e.preventDefault(); dz.classList.remove("over"); var fl=e.dataTransfer.files[0]; if(fl) readFile(fl); });
+    }
+  }
+
+  /* ---------- upload ---------- */
+  function readFile(file){
+    S.upMsg=null;
+    if(typeof XLSX==="undefined"){ S.upMsg=["err","The Excel reader did not load. Reload the page and try again."]; render(); return; }
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var wb=XLSX.read(new Uint8Array(fr.result),{type:"array"});
+        var parsed=SchemeParser.parseWorkbook(XLSX,wb);
+        S.up={ parsed:parsed, fileName:file.name, month:(S.config&&S.config.month)||new Date().toLocaleDateString("en-IN",{month:"long",year:"numeric"}) };
+      }catch(e){ S.up=null; S.upMsg=["err","Could not read this file: "+(e.message||e)]; }
+      render();
+    };
+    fr.onerror=function(){ S.upMsg=["err","Could not open the file. Try saving it again from Excel."]; render(); };
+    fr.readAsArrayBuffer(file);
+  }
+  async function publish(){
+    var u=S.up; if(!u||!S.db) return;
+    var label=($("monthLabel")||{}).value||u.month;
+    u.busy=true; render();
+    var me=null; try{ var us=await claude.use("user"); me=us?await us.id():null; }catch(e){}
+    var doc={ month:label, fileName:u.fileName, uploadedAt:new Date().toISOString(), uploadedBy:me,
+      groups:u.parsed.groups, cols:u.parsed.cols, dealers:u.parsed.dealers };
+    try{
+      await S.db.doc("portal/current").set(doc);
+      S.up=null; S.upMsg=["ok","Published "+label+" for "+doc.dealers.length+" dealers. TSMs see the new figures now."];
+    }catch(e){
+      u.busy=false;
+      S.upMsg=["err", e&&e.code==="invalid_argument" ? "Upload refused. Only people with Editor access can publish, and the file must be under 256 KB once read." : "Publish failed ("+(e&&e.code||"error")+"). Try again in a moment."];
+    }
+    render();
+  }
+  async function saveCfg(){
+    var t=$("cfgText"); if(!t||!S.db) return;
+    var c;
+    try{ c=JSON.parse(t.value); }catch(e){ S.cfgMsg=["err","The rules are not valid JSON: "+e.message]; render(); return; }
+    if(!c||!Array.isArray(c.schemes)||c.schemes.some(function(s){ return !s.group||!Array.isArray(s.parts); })){ S.cfgMsg=["err","Each scheme needs a \"group\" heading and a \"parts\" list."]; render(); return; }
+    try{ await S.db.doc("portal/slabs").set({config:c, updatedAt:new Date().toISOString()}); S.cfgMsg=["ok","Slab rules saved."]; }
+    catch(e){ S.cfgMsg=["err","Save refused ("+(e&&e.code||"error")+"). Only editors can change slab rules."]; }
+    render();
+  }
+
+  /* ---------- search ---------- */
+  var hits=[], hi=-1;
+  function showResults(){
+    var q=$("q").value.trim().toLowerCase(), box=$("results");
+    if(!q){ box.hidden=true; hits=[]; return; }
+    hits=dealers().filter(function(d){ return d.n.toLowerCase().indexOf(q)>=0 || d.c.indexOf(q)>=0; })
+      .sort(function(a,b){ var A=a.n.toLowerCase().indexOf(q)===0?0:1, B=b.n.toLowerCase().indexOf(q)===0?0:1; return A-B || a.n.localeCompare(b.n); }).slice(0,8);
+    hi=hits.length?0:-1;
+    box.innerHTML = hits.length ? hits.map(function(d,i){ return '<button type="button" data-hit="'+esc(d.c)+'" class="'+(i===hi?"on":"")+'"><span>'+esc(d.n)+'</span><small>'+esc(d.t)+' · '+esc(d.c)+'</small></button>'; }).join("") : '<button type="button" disabled><span class="muted">No dealer matches “'+esc(q)+'”</span></button>';
+    box.hidden=false;
+  }
+  function openDealer(code){
+    var d=findDealer(code); if(!d) return;
+    if(S.tsm && d.t!==S.tsm){ S.tsm=d.t; ls("sp.tsm",S.tsm); }
+    S.dealer=code; S.tab="dealer"; $("q").value=""; $("results").hidden=true; render(); window.scrollTo({top:0});
+  }
+
+  /* ---------- events ---------- */
+  $("tsm").addEventListener("change",function(e){ S.tsm=e.target.value; ls("sp.tsm",S.tsm); var d=findDealer(S.dealer); if(d && S.tsm && d.t!==S.tsm) S.dealer=""; render(); });
+  $("dealer").addEventListener("change",function(e){ S.dealer=e.target.value; S.tab="dealer"; render(); });
+  $("q").addEventListener("input",showResults);
+  $("q").addEventListener("keydown",function(e){
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); if(!hits.length) return; hi=(hi+(e.key==="ArrowDown"?1:-1)+hits.length)%hits.length; document.querySelectorAll("#results button").forEach(function(b,i){ b.classList.toggle("on",i===hi); }); }
+    else if(e.key==="Enter"&&hits[hi]){ e.preventDefault(); openDealer(hits[hi].c); }
+    else if(e.key==="Escape"){ $("results").hidden=true; }
+  });
+  $("results").addEventListener("mousedown",function(e){ var b=e.target.closest("[data-hit]"); if(b){ e.preventDefault(); openDealer(b.dataset.hit); } });
+  $("q").addEventListener("blur",function(){ setTimeout(function(){ $("results").hidden=true; },150); });
+  document.querySelector(".tabs").addEventListener("click",function(e){ var b=e.target.closest("[data-tab]"); if(b){ S.tab=b.dataset.tab; render(); } });
+  $("uploadBtn").addEventListener("click",function(){ S.showUpload=!S.showUpload; S.upMsg=null; render(); });
+  $("main").addEventListener("click",function(e){
+    var r=e.target.closest("[data-dealer]"); if(r){ openDealer(r.dataset.dealer); return; }
+    var p=e.target.closest("[data-push]"); if(p){ S.push=p.dataset.push; render(); return; }
+    var a=e.target.closest("[data-act]"); if(!a) return;
+    var act=a.dataset.act;
+    if(act==="publish") publish();
+    else if(act==="cancelup"){ S.up=null; S.upMsg=null; render(); }
+    else if(act==="editcfg"){ S.editCfg=!S.editCfg; S.cfgMsg=null; render(); }
+    else if(act==="savecfg") saveCfg();
+  });
+
+  /* ---------- boot ---------- */
+  S.tsm = ls("sp.tsm") || "";
+  render();
+  (async function(){
+    var db=null, user=null;
+    try{ db = window.claude ? await claude.use("db") : null; }catch(e){ db=null; }
+    try{ user = window.claude ? await claude.use("user") : null; }catch(e){ user=null; }
+    S.db=db;
+    if(user){ try{ S.canEdit = await user.canEdit(); }catch(e){ S.canEdit=false; } }
+    if(!db){ S.loaded.data=true; S.loaded.cfg=true; render(); return; }
+    db.doc("portal/current").onSnapshot(function(snap){
+      S.loaded.data=true;
+      S.meta = snap.exists ? snap.data() : null;
+      if(S.meta && S.tsm && !S.meta.dealers.some(function(d){ return d.t===S.tsm; })) S.tsm="";
+      if(S.meta && S.dealer && !findDealer(S.dealer)) S.dealer="";
+      render();
+    }, function(){ S.loaded.data=true; render(); });
+    db.doc("portal/slabs").onSnapshot(function(snap){
+      S.loaded.cfg=true;
+      S.config = snap.exists ? (snap.data().config||null) : null;
+      render();
+    }, function(){ S.loaded.cfg=true; render(); });
+  })();
+})();
+</script>
