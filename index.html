@@ -244,61 +244,20 @@ ul.plain{margin:0;padding-left:18px}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-/* Slab rules for the month (from the scheme letter). Update this block when the letter changes. */
+/* Slab rules for November 2026 (Opus letter IN2-011126-V05-002 + Allwood South Kerala letter). Update this block when the letter changes. */
 window.SLABS = {
- "month": "October 2026",
- "letter": "IN2-021026-V11-002 · Kerala",
+ "month": "November 2026",
+ "letter": "IN2-011126-V05-002 · Kerala (Allwood: Oct 2026 South Kerala letter)",
  "schemes": [
-  {
-   "group": "OTC · Kerala (1st - 27th)",
-   "name": "OTC Diary scheme",
-   "period": "1–27 Oct",
-   "ends": "2026-10-27",
-   "highlight": true,
-   "parts": [
-    {
-     "label": "Diaries on GSR",
-     "unit": "₹",
-     "basis": "GSR Value",
-     "giftCol": "Gifts",
-     "giftUnit": "diaries",
-     "note": "Diaries by GSR value billed 1–27 Oct.",
-     "slabs": [
-      {
-       "min": 100000,
-       "gift": "5 diaries"
-      },
-      {
-       "min": 200000,
-       "gift": "10 diaries"
-      },
-      {
-       "min": 400000,
-       "gift": "18 diaries"
-      },
-      {
-       "min": 600000,
-       "gift": "26 diaries"
-      },
-      {
-       "min": 900000,
-       "gift": "36 diaries"
-      },
-      {
-       "min": 1200000,
-       "gift": "50 diaries"
-      }
-     ]
-    }
-   ]
-  },
   {
    "group": "Early Bird",
    "name": "Early Bird",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "EB1",
-     "period": "1–9 Oct",
+     "period": "1–11 Nov",
+     "ends": "2026-11-11",
      "unit": "₹",
      "basis": "EB1 GSR(Q)",
      "pctCol": "EB1 CN%",
@@ -306,22 +265,22 @@ window.SLABS = {
      "slabs": [
       {
        "min": 50000,
-       "pct": 0.01
+       "pct": 0.013
       },
       {
        "min": 100000,
-       "pct": 0.015
+       "pct": 0.017
       },
       {
        "min": 200000,
-       "pct": 0.02
+       "pct": 0.021
       }
-     ],
-     "ends": "2026-10-09"
+     ]
     },
     {
      "label": "EB2",
-     "period": "10–16 Oct",
+     "period": "12–19 Nov",
+     "ends": "2026-11-19",
      "unit": "₹",
      "basis": "EB2 GSR(Q)",
      "pctCol": "EB2 CN%",
@@ -329,22 +288,22 @@ window.SLABS = {
      "slabs": [
       {
        "min": 50000,
-       "pct": 0.007
+       "pct": 0.009
       },
       {
        "min": 100000,
-       "pct": 0.01
+       "pct": 0.012
       },
       {
        "min": 200000,
-       "pct": 0.013
+       "pct": 0.015
       }
-     ],
-     "ends": "2026-10-16"
+     ]
     },
     {
      "label": "EB3",
-     "period": "17–23 Oct",
+     "period": "20–26 Nov",
+     "ends": "2026-11-26",
      "unit": "₹",
      "basis": "EB3 GSR(Q)",
      "pctCol": "EB3 CN%",
@@ -352,51 +311,50 @@ window.SLABS = {
      "slabs": [
       {
        "min": 50000,
-       "pct": 0.003
-      },
-      {
-       "min": 100000,
        "pct": 0.005
       },
       {
-       "min": 200000,
+       "min": 100000,
        "pct": 0.007
+      },
+      {
+       "min": 200000,
+       "pct": 0.009
       }
-     ],
-     "ends": "2026-10-23"
+     ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Rise to Shine",
    "name": "Rise to Shine",
-   "period": "1–5 Oct",
+   "period": "1–5 Nov",
+   "ends": "2026-11-05",
    "parts": [
     {
      "label": "GSR gift",
      "unit": "₹",
      "basis": "GSR",
      "giftCol": "Gift",
-     "note": "Gifts as per the Kerala working sheet. Letter lists ₹400 CN at ₹20,000 and ₹600 CN at ₹30,000. No multiples.",
+     "note": "No multiples.",
      "slabs": [
       {
        "min": 20000,
-       "gift": "1 Water Camper"
+       "gift": "12 New Year calendars"
       },
       {
        "min": 30000,
-       "gift": "1 Iron Box"
+       "gift": "20 New Year calendars"
       }
      ]
     }
-   ],
-   "ends": "2026-10-05"
+   ]
   },
   {
    "group": "Luxury",
    "name": "Luxury emulsions",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -440,37 +398,28 @@ window.SLABS = {
     },
     {
      "label": "Interior topcoats fixed CN",
-     "period": "till 28 Oct",
+     "period": "till 28 Nov",
+     "ends": "2026-11-28",
      "basis": "Lux Int",
      "every": {
       "size": 50,
       "amt": 300
-     },
-     "ends": "2026-10-28"
-    },
-    {
-     "label": "Exterior topcoats fixed CN",
-     "period": "till 28 Oct",
-     "basis": "Lux Ext",
-     "every": {
-      "size": 50,
-      "amt": 250
-     },
-     "ends": "2026-10-28"
+     }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Premium",
    "name": "Premium emulsions",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
      "basis": "Act",
      "pctCol": "CN%",
      "cnCol": "CN",
+     "note": "Excludes Neo Floor Shade and Neo Tile Shade.",
      "slabs": [
       {
        "min": 40,
@@ -502,28 +451,52 @@ window.SLABS = {
       },
       {
        "min": 3000,
-       "pct": 0.075
+       "pct": 0.0725
       },
       {
        "min": 4000,
-       "pct": 0.08
+       "pct": 0.075
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
+  },
+  {
+   "group": "Neo Star & Ever Wash",
+   "name": "Neo Star & Ever Clear extra CN",
+   "period": "till 28 Nov",
+   "ends": "2026-11-28",
+   "parts": [
+    {
+     "label": "Neo Star",
+     "basis": "Neo Star Vol",
+     "every": {
+      "size": 100,
+      "amt": 250
+     }
+    },
+    {
+     "label": "Ever Clear",
+     "basis": "Ever Clear Vol",
+     "every": {
+      "size": 100,
+      "amt": 500
+     }
+    }
+   ]
   },
   {
    "group": "Floor Shade & Tile Shade",
    "name": "Neo Floor & Tile Shade",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
      "basis": "Act",
      "pctCol": "CN%",
      "cnCol": "CN",
-     "note": "Also: duffle bag (₹1,200) on 20 L Neo Floor Shade or 60 L Neo Tile Shade.",
+     "note": "Also: duffle bag (₹1,200) on every 20 L Neo Floor Shade or 60 L Neo Tile Shade.",
      "slabs": [
       {
        "min": 8,
@@ -531,41 +504,41 @@ window.SLABS = {
       },
       {
        "min": 20,
-       "pct": 0.04
+       "pct": 0.035
       },
       {
        "min": 50,
-       "pct": 0.045
+       "pct": 0.04
       },
       {
        "min": 100,
-       "pct": 0.05
+       "pct": 0.045
       },
       {
        "min": 200,
-       "pct": 0.055
+       "pct": 0.05
       },
       {
        "min": 300,
-       "pct": 0.065
+       "pct": 0.06
       },
       {
        "min": 400,
-       "pct": 0.07
+       "pct": 0.065
       },
       {
        "min": 500,
-       "pct": 0.08
+       "pct": 0.075
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Economy Emulsions",
    "name": "Economy & sub-economy emulsions",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Economy (Color Smart + Power Bright)",
@@ -591,19 +564,19 @@ window.SLABS = {
       },
       {
        "min": 1000,
-       "pct": 0.045
+       "pct": 0.0425
       },
       {
        "min": 1500,
-       "pct": 0.05
+       "pct": 0.0475
       },
       {
        "min": 2000,
-       "pct": 0.0525
+       "pct": 0.05
       },
       {
        "min": 3500,
-       "pct": 0.0575
+       "pct": 0.055
       }
      ]
     },
@@ -643,32 +616,30 @@ window.SLABS = {
      ]
     },
     {
+     "label": "Color Smart extra CN",
+     "basis": "Colour Smart Vol",
+     "every": {
+      "size": 100,
+      "amt": 150
+     },
+     "note": "Another ₹150 per 100 L on volume billed till 23 Nov."
+    },
+    {
      "label": "Power Bright extra CN",
-     "period": "till 28 Oct",
      "basis": "Power Bright Vol",
      "every": {
       "size": 100,
-      "amt": 600
+      "amt": 150
      },
-     "ends": "2026-10-28"
-    },
-    {
-     "label": "Power Fit extra CN",
-     "period": "till 28 Oct",
-     "basis": "Power Fit Vol",
-     "every": {
-      "size": 100,
-      "amt": 200
-     },
-     "ends": "2026-10-28"
+     "note": "Another ₹150 per 100 L on volume billed till 23 Nov."
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Alldry_COMPONENT 1",
    "name": "Alldry waterproofing",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -710,13 +681,13 @@ window.SLABS = {
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Alldry_COMPONENT 2",
    "name": "Alldry waterproofing · component 2",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -758,13 +729,13 @@ window.SLABS = {
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Additional Schem Alldry RM & CM",
    "name": "Repair Master & Crack Master",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -786,37 +757,29 @@ window.SLABS = {
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Additional Offer Alldry",
    "name": "Alldry extra fixed CN",
-   "period": "till 28 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
-     "label": "Alldry range",
+     "label": "All Alldry products",
      "basis": "Alldry",
      "every": {
       "size": 100,
-      "amt": 1500
-     }
-    },
-    {
-     "label": "Wallfix 4",
-     "basis": "Wallfix 4",
-     "every": {
-      "size": 50,
-      "amt": 125
+      "amt": 900
      }
     }
-   ],
-   "ends": "2026-10-28"
+   ]
   },
   {
    "group": "Comp PHP, PFP & PSP",
    "name": "Primers",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Perfect Start (PSP)",
@@ -842,12 +805,7 @@ window.SLABS = {
        "min": 500,
        "pct": 0.085
       }
-     ],
-     "extra": {
-      "size": 50,
-      "amt": 100,
-      "label": "Fixed CN every 50 L"
-     }
+     ]
     },
     {
      "label": "Pro Hide (PHP)",
@@ -861,12 +819,7 @@ window.SLABS = {
        "min": 500,
        "pct": 0.02
       }
-     ],
-     "extra": {
-      "size": 50,
-      "amt": 100,
-      "label": "Fixed CN every 50 L"
-     }
+     ]
     },
     {
      "label": "Perfect Choice (PCP)",
@@ -906,7 +859,7 @@ window.SLABS = {
      ],
      "extra": {
       "size": 50,
-      "amt": 475,
+      "amt": 150,
       "label": "Fixed CN every 50 L"
      }
     },
@@ -923,16 +876,16 @@ window.SLABS = {
      "basis": "Pro Smooth Primer",
      "every": {
       "size": 50,
-      "amt": 100
+      "amt": 250
      }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Comp Style Super Bright & Smooth",
    "name": "Super Bright & Super Smooth",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -963,13 +916,13 @@ window.SLABS = {
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Salt Seal",
    "name": "Salt Seal",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Fixed CN",
@@ -990,13 +943,13 @@ window.SLABS = {
       "amt": 600
      }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Stainers",
    "name": "Universal Stainers",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Fixed CN",
@@ -1029,13 +982,13 @@ window.SLABS = {
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Calista_Sparkle Glass Enamel",
    "name": "Sparkle Gloss Enamel",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -1043,72 +996,67 @@ window.SLABS = {
      "shadesCol": "No Shades Billed",
      "pctCol": "Final CN %",
      "cnCol": "CN",
-     "note": "₹200 from 20 L is as per the working sheet. Higher slabs need a minimum number of shades.",
+     "note": "Higher slabs need a minimum number of shades.",
      "slabs": [
       {
-       "min": 20,
-       "amt": 200
-      },
-      {
-       "min": 40,
-       "pct": 0.065
+       "min": 50,
+       "pct": 0.04
       },
       {
        "min": 125,
-       "pct": 0.07,
+       "pct": 0.045,
        "shades": 4
       },
       {
        "min": 250,
-       "pct": 0.08,
+       "pct": 0.05,
        "shades": 6
       },
       {
        "min": 400,
-       "pct": 0.1,
+       "pct": 0.07,
        "shades": 8
       },
       {
        "min": 750,
-       "pct": 0.105,
+       "pct": 0.075,
        "shades": 8
       },
       {
        "min": 1500,
-       "pct": 0.11,
+       "pct": 0.08,
        "shades": 8
       },
       {
        "min": 2500,
-       "pct": 0.12,
+       "pct": 0.09,
        "shades": 8
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Sparkle Satin & PU",
    "name": "Sparkle Satin & PU",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
-     "label": "Tea set",
+     "label": "Frying pan",
      "basis": "Vol",
      "every": {
       "size": 30,
-      "gift": "Tea & cookie set (₹1,899)"
-     },
-     "note": "Or the Enamel Thailand trip option."
+      "gift": "Branded frying pan (₹2,099)"
+     }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Cover Max Glass Enamel",
    "name": "Cover Max Gloss Enamel",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Volume CN",
@@ -1139,13 +1087,13 @@ window.SLABS = {
       "label": "Fixed CN every 50 L"
      }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "RO & Wood Primer",
    "name": "Cover Max RO / Sparkle RO / Wood primers",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Fixed CN",
@@ -1156,13 +1104,13 @@ window.SLABS = {
       "amt": 350
      }
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Sparkle RO & YO",
    "name": "Sparkle RO, YO & designer finish",
-   "period": "1–31 Oct",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
      "label": "Sparkle RO / YO / Epoxy / Wood",
@@ -1177,6 +1125,21 @@ window.SLABS = {
       {
        "min": 150,
        "pct": 0.02
+      }
+     ]
+    },
+    {
+     "label": "New dealer billing offer",
+     "basis": "Act",
+     "note": "One-time CN only for dealers who did not bill Sparkle RO, YO or Epoxy in Aug, Sep and Oct.",
+     "slabs": [
+      {
+       "min": 50,
+       "amt": 200
+      },
+      {
+       "min": 100,
+       "amt": 350
       }
      ]
     },
@@ -1197,6 +1160,7 @@ window.SLABS = {
     {
      "label": "Interior Designer Finish",
      "basis": "Inter Design",
+     "note": "One Dream Dunora launch: ₹300 CN on every 6 L carton.",
      "slabs": [
       {
        "min": 6,
@@ -1207,217 +1171,238 @@ window.SLABS = {
        "pct": 0.08
       },
       {
-       "min": 51,
+       "min": 50,
        "pct": 0.09
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
-  },
-  {
-   "group": "Rollers",
-   "name": "Artist rollers",
-   "period": "1–31 Oct",
-   "parts": [
-    {
-     "label": "GSR CN",
-     "unit": "₹",
-     "basis": "GSR",
-     "note": "One-time ₹500 CN for first-time tools billing of ₹5,000+.",
-     "slabs": [
-      {
-       "min": 5000,
-       "pct": 0.22
-      },
-      {
-       "min": 10001,
-       "pct": 0.26
-      },
-      {
-       "min": 15001,
-       "pct": 0.31
-      }
-     ]
-    }
-   ],
-   "ends": "2026-10-31"
-  },
-  {
-   "group": "MT",
-   "name": "Artist masking tape",
-   "period": "1–31 Oct",
-   "parts": [
-    {
-     "label": "GSR CN",
-     "unit": "₹",
-     "basis": "GSR",
-     "slabs": [
-      {
-       "min": 5000,
-       "pct": 0.25
-      },
-      {
-       "min": 10001,
-       "pct": 0.27
-      },
-      {
-       "min": 15001,
-       "pct": 0.31
-      }
-     ]
-    }
-   ],
-   "ends": "2026-10-31"
-  },
-  {
-   "group": "SP",
-   "name": "Artist sandpapers",
-   "period": "1–31 Oct",
-   "parts": [
-    {
-     "label": "GSR CN",
-     "unit": "₹",
-     "basis": "GSR",
-     "slabs": [
-      {
-       "min": 5000,
-       "pct": 0.22
-      },
-      {
-       "min": 10001,
-       "pct": 0.28
-      },
-      {
-       "min": 15001,
-       "pct": 0.33
-      }
-     ]
-    }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
    "group": "Ancillary",
-   "name": "Ancillary reward",
-   "period": "1–31 Oct",
+   "name": "Ancillary reward & Aluminium Paint",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
    "parts": [
     {
-     "label": "Sling bag (Aluminium, KPF, Clear Varnish)",
+     "label": "Aluminium, Knifing Filler, Clear Varnish",
      "basis": [
       "Aluminium",
       "KPF",
       "Clear Syn Varnish"
      ],
      "every": {
-      "size": 15,
-      "gift": "Sling bag"
+      "size": 20,
+      "amt": 150
      }
     },
     {
-     "label": "Style Aluminium Paint CN",
+     "label": "Style Aluminium Paint launch CN",
      "basis": "Aluminium",
+     "note": "Plus 5% in-bill.",
      "slabs": [
       {
        "min": 100,
-       "pct": 0.03
+       "pct": 0.05
       },
       {
        "min": 200,
+       "pct": 0.1
+      },
+      {
+       "min": 350,
+       "pct": 0.13
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "group": "True Look Shine",
+   "name": "True Look Shine launch",
+   "period": "1–30 Nov",
+   "ends": "2026-11-30",
+   "parts": [
+    {
+     "label": "Grooming kit",
+     "basis": "Vol",
+     "every": {
+      "size": 30,
+      "gift": "BSC grooming kit (₹1,237)"
+     }
+    }
+   ]
+  },
+  {
+   "group": "Softtouch",
+   "name": "Allwood Softtouch",
+   "period": "Allwood letter",
+   "ends": "2026-11-30",
+   "parts": [
+    {
+     "label": "Gloss (rate on total Softtouch volume)",
+     "basis": [
+      "Gloss",
+      "Mat"
+     ],
+     "note": "One-time ₹100 CN on 18 L of Softtouch.",
+     "slabs": [
+      {
+       "min": 18,
+       "pct": 0.01
+      },
+      {
+       "min": 30,
+       "pct": 0.03
+      },
+      {
+       "min": 50,
        "pct": 0.05
+      },
+      {
+       "min": 100,
+       "pct": 0.06
       },
       {
        "min": 300,
        "pct": 0.07
       },
       {
-       "min": 950,
-       "pct": 0.1
-      }
-     ]
-    }
-   ],
-   "ends": "2026-10-31"
-  },
-  {
-   "group": "True Look Shine",
-   "name": "True Look Shine launch",
-   "period": "1–31 Oct",
-   "parts": [
-    {
-     "label": "Grooming kit",
-     "basis": "Vol",
-     "every": {
-      "size": 25,
-      "gift": "Grooming kit (₹1,237)"
-     }
-    }
-   ],
-   "ends": "2026-10-31"
-  },
-  {
-   "group": "Eco Thailand",
-   "name": "Style Getaway · Thailand",
-   "period": "1 Sep – 31 Oct",
-   "parts": [
-    {
-     "label": "Economy + sub-economy, Sep + Oct",
-     "basis": [
-      "Sep Total Eco Vol",
-      "Total Economy"
-     ],
-     "giftCol": "Thailand Ticket",
-     "note": "Dealer gets the trip or the volume CN, at the highest slab level.",
-     "gates": [
-      {
-       "label": "Sep billing ≥ 2,400 L",
-       "col": "Sep Total Eco Vol",
-       "min": 2400
+       "min": 400,
+       "pct": 0.075
       },
       {
-       "label": "Oct billing ≥ 3,200 L",
-       "col": "Total Economy",
-       "min": 3200
+       "min": 500,
+       "pct": 0.085
+      },
+      {
+       "min": 700,
+       "pct": 0.095
+      },
+      {
+       "min": 1000,
+       "pct": 0.11
       }
+     ]
+    },
+    {
+     "label": "Matte (rate on total Softtouch volume)",
+     "basis": [
+      "Gloss",
+      "Mat"
      ],
      "slabs": [
       {
-       "min": 8000,
-       "gift": "1 Thailand ticket (3N/4D)"
+       "min": 18,
+       "pct": 0.06
+      },
+      {
+       "min": 30,
+       "pct": 0.08
+      },
+      {
+       "min": 50,
+       "pct": 0.1
+      },
+      {
+       "min": 100,
+       "pct": 0.11
+      },
+      {
+       "min": 300,
+       "pct": 0.12
+      },
+      {
+       "min": 400,
+       "pct": 0.125
+      },
+      {
+       "min": 500,
+       "pct": 0.13
+      },
+      {
+       "min": 700,
+       "pct": 0.135
+      },
+      {
+       "min": 1000,
+       "pct": 0.14
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   },
   {
-   "group": "Enamel Thailan Dhamaka",
-   "name": "Enamel Thailand Dhamaka",
-   "period": "1 Sep – 31 Oct",
+   "group": "Melamine",
+   "name": "Allwood Melamine",
+   "period": "Allwood letter",
+   "ends": "2026-11-30",
    "parts": [
     {
-     "label": "Sparkle Gloss + Satin + PU, Sep + Oct",
-     "basis": [
-      "Sep Vol",
-      "Oct Vol"
-     ],
-     "giftCol": "Thailand",
-     "gates": [
-      {
-       "label": "Sep billing ≥ 1,200 L",
-       "col": "Sep Vol",
-       "min": 1200
-      }
-     ],
+     "label": "Melamine (excl. Ultra Clear)",
+     "basis": "Ex Ultra Vol",
      "slabs": [
       {
-       "min": 4000,
-       "gift": "Thailand trip (2N/3D)"
+       "min": 24,
+       "pct": 0.03
+      },
+      {
+       "min": 50,
+       "pct": 0.05
+      },
+      {
+       "min": 100,
+       "pct": 0.06
+      },
+      {
+       "min": 200,
+       "pct": 0.07
+      },
+      {
+       "min": 600,
+       "pct": 0.09
+      },
+      {
+       "min": 1000,
+       "pct": 0.1
+      },
+      {
+       "min": 1500,
+       "pct": 0.11
+      },
+      {
+       "min": 2000,
+       "pct": 0.12
+      }
+     ]
+    },
+    {
+     "label": "Melamine Ultra Clear",
+     "basis": "Ultra Vol",
+     "slabs": [
+      {
+       "min": 10,
+       "pct": 0.09
+      },
+      {
+       "min": 20,
+       "pct": 0.11
+      },
+      {
+       "min": 40,
+       "pct": 0.13
+      },
+      {
+       "min": 80,
+       "pct": 0.14
+      },
+      {
+       "min": 100,
+       "pct": 0.16
       }
      ]
     }
-   ],
-   "ends": "2026-10-31"
+   ]
   }
  ]
 };
