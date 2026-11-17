@@ -168,6 +168,15 @@ tr.click:hover td{background:var(--accent-soft)}
 .drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:200px;z-index:2}
 .alt-pick{display:flex;flex-direction:column;gap:6px;font-size:13px}
 .alt-pick input[type=file]{font-size:14px;max-width:100%}
+.pastebox{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.pastebox summary{cursor:pointer;font-weight:700;font-size:15px}
+.pastebox ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.pastegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pastegrid label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pastegrid textarea{min-height:90px;width:100%;font-size:14px;font-family:var(--body);border:1.5px dashed var(--line);border-radius:10px;background:var(--sunk);padding:10px;resize:vertical}
+.pastegrid .st{font-size:13px;margin-top:4px}
+.pastegrid .st.ok{color:var(--good)}
+@media (max-width:640px){.pastegrid{grid-template-columns:minmax(0,1fr)}}
 .help{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .help b{color:var(--ink)}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
@@ -1482,8 +1491,12 @@ var SchemeParser = (function () {
           if (typeof v === "string") {
             var s = v.trim();
             if (/^#/.test(s)) { errorCells++; return; }
-            var num = Number(s.replace(/,/g, ""));
-            if (s !== "" && !isNaN(num)) v = num; else v = s;
+            if (/^[-–—]$/.test(s)) return;
+            var t = s.replace(/[₹,\s\u00a0]/g, "").replace(/^Rs\.?/i, "");
+            var neg = /^\((.*)\)$/.exec(t); if (neg) t = "-" + neg[1];
+            var pc = /%$/.test(t); if (pc) t = t.slice(0, -1);
+            var num = Number(t);
+            if (t !== "" && !isNaN(num)) v = pc ? num / 100 : num; else v = s;
           } else if (typeof v === "boolean") {
             v = v ? 1 : 0;
           } else if (typeof v === "number" && !isFinite(v)) {
@@ -1735,7 +1748,7 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
   var CFG = window.PORTAL_CONFIG || {};
   var API = "local";
   var STORE_KEY = "sp.working.v1";
-  var S = { meta:null, config:null, loaded:{data:false,cfg:false}, canEdit:true, loadError:null, checkedAt:null, stamp:null,
+  var S = { meta:null, config:null, loaded:{data:false,cfg:false}, canEdit:true, loadError:null, checkedAt:null, stamp:null, paste:{main:null,otc:null},
             tsm:"", dealer:"", tab:"dealer", push:"25", showUpload:false, up:null, upMsg:null, cfgMsg:null, editCfg:false };
   var $ = function(id){ return document.getElementById(id); };
   var today = (function(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); })();
@@ -2001,11 +2014,29 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     var h='<section class="panel" aria-labelledby="upH"><h3 id="upH">Upload scheme working</h3>'+
       (inAppBrowser()?'<div class="msg info">You seem to have opened this link inside another app. If the file picker does not open, tap the menu (⋮ or ···) and choose <b>Open in Chrome</b> or <b>Open in browser</b>.</div>':'')+
       '<div class="drop" id="drop"><b>Tap here to choose the Excel file</b><br><span class="muted">or drop it here · .xlsx, .xls, .xlsm</span><br><span class="pick-btn" aria-hidden="true">Choose file</span><input id="file" class="fileIn" type="file" aria-label="Choose scheme working Excel file"></div>'+
-      '<div class="alt-pick"><label for="file2" class="muted">Picker not opening? Try this button instead:</label><input id="file2" class="fileIn" type="file"></div>'+
+      '<div class="alt-pick"><label for="file2" class="muted">Picker not opening? Try this button instead:</label><input id="file2" class="fileIn" type="file" accept=".xlsx,.xls,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/vnd.ms-excel.sheet.macroEnabled.12"></div>'+
+      pasteBlock()+
       '<div class="help"><span><b>Excel received on WhatsApp?</b> Open it in WhatsApp and tap Download or Save first. Then look under <b>Downloads</b> or <b>Documents</b> in the file picker.</span><span><b>Nothing happens when you tap?</b> Open this link in Chrome or another full browser, not inside WhatsApp or Instagram.</span></div>';
     if(S.upMsg) h+='<div class="msg '+S.upMsg[0]+'">'+esc(S.upMsg[1])+'</div>';
     h+='<p class="note" style="margin:0">The file is read in this browser only and is not uploaded to any server.</p></section>';
     return h;
+  }
+  function pasteStatus(key){
+    var r=S.paste[key];
+    if(!r) return '<div class="st muted" id="st-'+key+'">Nothing pasted yet</div>';
+    return '<div class="st ok" id="st-'+key+'">✓ Pasted '+r.length+' rows × '+r.reduce(function(m,x){ return Math.max(m,x.length); },0)+' columns</div>';
+  }
+  function pasteBlock(){
+    return '<details class="pastebox"'+(S.paste.main||S.paste.otc?' open':'')+'><summary>Work tablet only shows Photos? Paste from Excel instead</summary>'+
+      '<ol><li>Open the scheme-working file in the <b>Excel app</b>.</li>'+
+      '<li>Go to the <b>Scheme Working</b> sheet and tap the small box at the top-left corner of the grid (above row 1, left of column A) to select the whole sheet.</li>'+
+      '<li>Tap <b>Copy</b>, come back here, long-press the first box below and tap <b>Paste</b>.</li>'+
+      '<li>Optional: do the same for the <b>OTC Working</b> sheet in the second box.</li>'+
+      '<li>Tap <b>Load pasted data</b>.</li></ol>'+
+      '<div class="pastegrid"><div><label for="paste-main">Scheme Working sheet</label><textarea id="paste-main" class="pastein" data-key="main" placeholder="Long-press and Paste here" autocomplete="off" spellcheck="false"></textarea>'+pasteStatus("main")+'</div>'+
+      '<div><label for="paste-otc">OTC Working sheet (optional)</label><textarea id="paste-otc" class="pastein" data-key="otc" placeholder="Long-press and Paste here" autocomplete="off" spellcheck="false"></textarea>'+pasteStatus("otc")+'</div></div>'+
+      '<div class="row"><button class="btn primary" type="button" data-act="loadpaste"'+(S.paste.main?'':' disabled')+'>Load pasted data</button>'+(S.paste.main||S.paste.otc?'<button class="btn" type="button" data-act="clearpaste">Clear pasted</button>':'')+'</div>'+
+      '<p class="note" style="margin:0">Pasting copies the numbers as Excel shows them, so amounts shown rounded in Excel are rounded here too.</p></details>';
   }
   function render(){
     renderTop();
@@ -2016,6 +2047,13 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     else h+= S.tab==="dealer" ? viewDealer() : S.tab==="push" ? viewPush() : viewBook();
     $("main").innerHTML=h;
     document.querySelectorAll(".fileIn").forEach(function(f){ f.addEventListener("change",function(){ if(f.files&&f.files[0]) readFile(f.files[0]); }); });
+    document.querySelectorAll(".pastein").forEach(function(ta){
+      ta.addEventListener("paste",function(e){
+        var t=e.clipboardData&&e.clipboardData.getData("text/plain");
+        if(t){ e.preventDefault(); takePaste(ta.dataset.key,t); }
+      });
+      ta.addEventListener("input",function(){ if(ta.value.length>20){ var t=ta.value; ta.value=""; takePaste(ta.dataset.key,t); } });
+    });
     var dz=$("drop");
     if(dz){
       dz.addEventListener("dragover",function(e){ e.preventDefault(); dz.classList.add("over"); });
@@ -2034,20 +2072,56 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     fr.onload=function(){
       try{
         var wb=XLSX.read(new Uint8Array(fr.result),{type:"array"});
-        var parsed=SchemeParser.parseWorkbook(XLSX,wb);
-        S.meta={ month:(S.config&&S.config.month)||"", fileName:file.name,
-          fileModified: file.lastModified ? new Date(file.lastModified).toISOString() : null,
-          uploadedAt:new Date().toISOString(), groups:parsed.groups, cols:parsed.cols, dealers:parsed.dealers };
-        if(S.tsm && !S.meta.dealers.some(function(d){ return d.t===S.tsm; })) S.tsm="";
-        if(S.dealer && !findDealer(S.dealer)) S.dealer="";
-        var saved=true; try{ localStorage.setItem(STORE_KEY, JSON.stringify(S.meta)); }catch(e){ saved=false; }
-        S.showUpload=false; S.upMsg=null;
-        S.flash=["ok","Loaded "+file.name+": "+parsed.dealers.length+" dealers, "+Object.keys(parsed.tsms).length+" TSMs."+(saved?"":" This browser could not remember it, so upload it again next time.")+(parsed.warnings.length?" "+parsed.warnings.join(" "):"")];
+        useWorkbook(wb, file.name, file.lastModified ? new Date(file.lastModified).toISOString() : null);
       }catch(e){ S.upMsg=["err","Could not read this file: "+(e.message||e)]; }
       render();
     };
     fr.onerror=function(){ S.upMsg=["err","Could not open the file. Try saving it again from Excel."]; render(); };
     fr.readAsArrayBuffer(file);
+  }
+  function parseTSV(text){
+    var rows=[], row=[], f="", q=false;
+    for(var i=0;i<text.length;i++){
+      var c=text[i];
+      if(q){
+        if(c==='"'){ if(text[i+1]==='"'){ f+='"'; i++; } else q=false; }
+        else f+=c;
+      } else if(c==='"' && f===""){ q=true; }
+      else if(c==="\t"){ row.push(f); f=""; }
+      else if(c==="\n"){ row.push(f); rows.push(row); row=[]; f=""; }
+      else if(c!=="\r"){ f+=c; }
+    }
+    if(f!==""||row.length){ row.push(f); rows.push(row); }
+    while(rows.length && rows[rows.length-1].every(function(x){ return x===""; })) rows.pop();
+    return rows;
+  }
+  function takePaste(key,text){
+    var rows=parseTSV(text);
+    var ok=rows.length>2 && rows.some(function(r){ return r.length>3; });
+    if(!ok){ S.paste[key]=null; S.upMsg=["err","That paste did not look like a sheet. In Excel, select the whole sheet with the corner box, tap Copy, then paste again."]; render(); return; }
+    S.paste[key]=rows; S.upMsg=null; render();
+  }
+  function useWorkbook(wb, name, modifiedIso){
+    var parsed=SchemeParser.parseWorkbook(XLSX,wb);
+    S.meta={ month:(S.config&&S.config.month)||"", fileName:name, fileModified: modifiedIso||null,
+      uploadedAt:new Date().toISOString(), groups:parsed.groups, cols:parsed.cols, dealers:parsed.dealers };
+    if(S.tsm && !S.meta.dealers.some(function(d){ return d.t===S.tsm; })) S.tsm="";
+    if(S.dealer && !findDealer(S.dealer)) S.dealer="";
+    var saved=true; try{ localStorage.setItem(STORE_KEY, JSON.stringify(S.meta)); }catch(e){ saved=false; }
+    S.showUpload=false; S.upMsg=null;
+    S.flash=["ok","Loaded "+name+": "+parsed.dealers.length+" dealers, "+Object.keys(parsed.tsms).length+" TSMs."+(saved?"":" This browser could not remember it, so load it again next time.")+(parsed.warnings.length?" "+parsed.warnings.join(" "):"")];
+  }
+  function loadPasted(){
+    if(!S.paste.main) return;
+    if(typeof XLSX==="undefined"){ S.upMsg=["err","The Excel reader did not load. Check your internet connection and reload the page."]; render(); return; }
+    try{
+      var wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(S.paste.main), "Scheme Working");
+      if(S.paste.otc) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(S.paste.otc), "OTC Working");
+      useWorkbook(wb, "Pasted from Excel", null);
+      S.paste={main:null,otc:null};
+    }catch(e){ S.upMsg=["err","Could not read the pasted sheet: "+(e.message||e)+" Make sure you copied from row 1, including the scheme headings."]; }
+    render();
   }
   function restore(){
     try{ var t=localStorage.getItem(STORE_KEY); if(t){ var m=JSON.parse(t); if(m && Array.isArray(m.dealers)) S.meta=m; } }catch(e){}
@@ -2094,6 +2168,8 @@ if (typeof module !== "undefined") module.exports = SlabEngine;
     var a=e.target.closest("[data-act]"); if(!a) return;
     var act=a.dataset.act;
     if(act==="openup"){ S.showUpload=true; S.upMsg=null; render(); window.scrollTo({top:0}); }
+    else if(act==="loadpaste") loadPasted();
+    else if(act==="clearpaste"){ S.paste={main:null,otc:null}; S.upMsg=null; render(); }
   });
 
   /* ---------- boot ---------- */
